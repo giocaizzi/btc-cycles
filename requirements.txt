@@ -1,0 +1,5 @@
+ipykernel
+cryptocmd
+matplotlib
+numpy
+pandas
