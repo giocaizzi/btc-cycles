@@ -11,8 +11,7 @@ permissions:
 jobs:
   update_chart:
     runs-on: ubuntu-latest
-    outputs:
-      time: ${{ steps.current_time.outputs.time }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -28,13 +27,12 @@ jobs:
       - name: Run notebook
         run: jupyter nbconvert --to notebook --execute --inplace bitcoin.ipynb
 
-      - name: Current time
-        id: current_time
-        run: 
-          echo "time=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+      - name: Get current time
+        uses: josStorer/get-current-time@v2
+        id: current-time
 
       - name: Commit and push changes
         uses: giocaizzi/python-dev-actions/.github/actions/commit@main
         with:
-            message: "Update chart:${{ steps.current_time.outputs.time }}"
+            message: "Update chart:${{ steps.current-time.outputs.readableTime }}"
             github-token: ${{ secrets.GITHUB_TOKEN }}
