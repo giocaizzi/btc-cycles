@@ -1,4 +1,5 @@
 ipykernel
+nbconvert
 cryptocmd
 matplotlib
 numpy
