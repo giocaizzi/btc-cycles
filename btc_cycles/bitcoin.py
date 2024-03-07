@@ -2,6 +2,7 @@
 
 from .halving import get_halving_data
 from .scraper import Scraper
+from .artists.artist import Artist
 
 import pandas as pd
 import datetime
@@ -50,7 +51,7 @@ class Bitcoin:
             how="outer",  # keep all halving dates
             on="Date",
         )
-        # fill NaNs due to merge
+        # fill NaNs due to merge on subset of columns
         self.prices[["Block", "cycle_length", "cycle", "Halving"]] = self.prices[
             ["Block", "cycle_length", "cycle", "Halving"]
         ].fillna(method="ffill")
@@ -65,6 +66,15 @@ class Bitcoin:
         self.prices = _find_ath(self.prices)
         # find cycle progress
         self.prices = _find_cycle_progress(self.prices)
+
+    def plot(self, kind="static", **kwargs):
+        """plot
+
+        Args:
+            kind (str, optional): plot kind. Defaults to "static".
+            \\*\\*kwargs: additional keyword arguments to plotting method
+        """
+        Artist(kind, self).plot(**kwargs)
 
 
 def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
