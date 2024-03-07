@@ -30,6 +30,7 @@ class Bitcoin:
 
     def _set_history(self) -> None:
         """set history DataFrame"""
+        # halvings history
         self.history = pd.DataFrame(
             [(self._founded, 0)] + HALVINGS + [(get_halving_data())],
             columns=["Date", "block"],
@@ -51,7 +52,7 @@ class Bitcoin:
             how="outer",  # keep all halving dates
             on="Date",
         )
-        # fill NaNs due to merge on subset of columns
+        # fill NaNs due to merge only on subset of columns
         self.prices[["Block", "cycle_length", "cycle", "Halving"]] = self.prices[
             ["Block", "cycle_length", "cycle", "Halving"]
         ].fillna(method="ffill")
@@ -88,7 +89,9 @@ def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
         DataFrame: historical OHLC data with
             "ATH" and "distance_ath_perc" columns
     """
+    # find ATH
     dataframe["ATH"] = dataframe["Close"].cummax()
+    # find distance from ATH in percentage 
     dataframe["distance_ath_perc"] = (
         dataframe["Close"] / dataframe["ATH"]
     ) / dataframe["ATH"]
