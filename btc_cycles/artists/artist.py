@@ -23,6 +23,7 @@ class Artist:
             self._kind = kind
             self.artist = StaticArtist(bitcoin)
         elif kind == "dynamic":
+            # TODO: implement dynamic artist (plotly)
             raise NotImplementedError
         else:
             raise ValueError("kind must be 'static' or 'dynamic'")
