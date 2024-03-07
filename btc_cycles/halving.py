@@ -6,13 +6,15 @@ import datetime
 URL = "https://api.watcher.guru/bitcoinhalving/predictions"
 
 
-def get_halving_predicted_date():
+def get_halving_data():
     """Get halving predicted date
 
     Returns:
-        datetime: predicted halving date
+        tuple: date (datetime), block (int)
     """
-    current_status = requests.get(URL).json()
-    return datetime.datetime.fromtimestamp(
-        current_status["target"]["predicted_timestamp"]
+    response = requests.get(URL).json()
+    date = datetime.datetime.fromtimestamp(
+        response["target"]["predicted_timestamp"]
     )
+    block = response["target"]["block_number"]
+    return date, block

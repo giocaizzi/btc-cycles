@@ -15,7 +15,9 @@ pandas = "^2.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
+pytest-cov = "^4.1.0"
 black = "^24.2.0"
+flake8 = "^7.0.0"
 ipykernel = "^6.29.3"
 
 [build-system]

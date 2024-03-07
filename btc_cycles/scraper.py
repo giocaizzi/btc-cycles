@@ -4,17 +4,17 @@ from cryptocmd import CmcScraper
 
 
 class Scraper:
-    """Scraper class
+    """Scraper"""
 
-    Attributes:
-        coin: str, coin to scrape
-    """
-
-    def __init__(self, coin):
-        self.coin = coin
+    def __init__(self):
+        self.coin = "BTC"
 
     def get_data(self):
-        """Get data from coin"""
+        """Get historical OHLC data
+        
+        Returns:
+            DataFrame: OHLC data
+        """
         scraper = CmcScraper(self.coin)
         scraper.get_data()
         return scraper.get_dataframe()
