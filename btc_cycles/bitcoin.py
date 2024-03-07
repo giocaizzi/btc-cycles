@@ -17,13 +17,12 @@ class Bitcoin:
     """Bitcoin
 
     Attributes:
-        founded (datetime): founded date (2009-01-03)
         history (DataFrame): halving history
         prices (DataFrame): historical OHLC data
     """
 
     def __init__(self):
-        self.founded = datetime.datetime(2009, 1, 3)
+        self._founded = datetime.datetime(2009, 1, 3)
         self._set_history()
         self._set_prices()
         self._set_metrics()
@@ -31,7 +30,7 @@ class Bitcoin:
     def _set_history(self) -> None:
         """set history DataFrame"""
         self.history = pd.DataFrame(
-            [(self.founded, 0)] + HALVINGS + [(get_halving_data())],
+            [(self._founded, 0)] + HALVINGS + [(get_halving_data())],
             columns=["Date", "block"],
         )
         # cycle length
