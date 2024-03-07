@@ -8,4 +8,4 @@
 ---
 
 - Bitcoin price data from [coinmarketcap](https://www.coinmarketcap.com)
-- Cycles are computed considering *past halving dates* (`2012-11-28`, `2016-07-09`, `2020-05-11`) and the *expected future halving date* (`2024-04-01`)
+- Cycles are computed considering *past halving dates* (`2012-11-28`, `2016-07-09`, `2020-05-11`) and the *expected future halving date* fetched from [watchguru](https://watcher.guru/bitcoin-halving)
