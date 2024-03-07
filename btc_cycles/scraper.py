@@ -11,7 +11,7 @@ class Scraper:
 
     def get_data(self):
         """Get historical OHLC data
-        
+
         Returns:
             DataFrame: OHLC data
         """

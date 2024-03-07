@@ -13,8 +13,6 @@ def get_halving_data():
         tuple: date (datetime), block (int)
     """
     response = requests.get(URL).json()
-    date = datetime.datetime.fromtimestamp(
-        response["target"]["predicted_timestamp"]
-    )
+    date = datetime.datetime.fromtimestamp(response["target"]["predicted_timestamp"])
     block = response["target"]["block_number"]
     return date, block
