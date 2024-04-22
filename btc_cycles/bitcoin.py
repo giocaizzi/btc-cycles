@@ -1,6 +1,7 @@
 """bitcoin module"""
 
 from .prices import Prices
+from .halvings import get_halving_data
 from .artists import Artist
 
 
@@ -16,7 +17,9 @@ class Bitcoin:
     """
 
     def __init__(self):
+        # get price data
         self.prices = Prices().data
+        # predicted halving date
 
     def plot(self, kind="static", **kwargs):
         """plot

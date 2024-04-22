@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .static_artist import StaticArtist
+from .static import StaticArtist
 
 
 class Artist:

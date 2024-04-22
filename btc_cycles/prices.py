@@ -3,7 +3,7 @@
 import pandas as pd
 from cryptocmd import CmcScraper
 
-from .halvings import Halvings, get_halving_data
+from .halvings import Halvings
 
 
 def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -81,9 +81,9 @@ class Prices:
         )
         # # fill NaNs due to merge only on subset of columns
         self.data[["block", "cycle_length", "cycle_id", "Halving", "reward"]] = (
-            self.data[
-                ["block", "cycle_length", "cycle_id", "Halving", "reward"]
-            ].infer_objects().ffill()
+            self.data[["block", "cycle_length", "cycle_id", "Halving", "reward"]]
+            .infer_objects()
+            .ffill()
         )
         # remove Halvings outside of prices datarange
         self.data = self.data[self.data["Close"].notna()]

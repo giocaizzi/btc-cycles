@@ -21,7 +21,6 @@ black = {version = "^24.2.0", extras = ["jupyter"]}
 flake8 = "^7.0.0"
 ipykernel = "^6.29.3"
 flake8-rst-docstrings = "^0.3.0"
-nbconvert = "^7.16.3"
 
 [build-system]
 requires = ["poetry-core"]
