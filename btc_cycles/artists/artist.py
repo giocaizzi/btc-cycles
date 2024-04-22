@@ -9,7 +9,10 @@ class Artist:
     """Artist for plotting"""
 
     def __init__(self, kind: str = "static", bitcoin: Bitcoin = None):
-        """_summary_
+        """Artist
+
+        Artist for plotting, either static or dynamic.
+        Static artist uses `matplotlib` and dynamic artist uses `plotly`.
 
         Args:
             kind (str, optional): _description_. Defaults to "static".
@@ -33,6 +36,10 @@ class Artist:
     def kind(self) -> str:
         return self._kind
 
-    def plot(self):
-        """wrapper for plot method of artist"""
-        self.artist.plot()
+    def plot(self, **kwargs):
+        """wrapper for plot method of artist
+
+        Args:
+            \\*\\*kwargs: additional keyword arguments to plotting method
+        """
+        self.artist.plot(**kwargs)
