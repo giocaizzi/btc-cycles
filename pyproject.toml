@@ -5,6 +5,7 @@ description = "Track Bitcoin price over halving cycles"
 authors = ["giocaizzi <giocaizzi@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+include = ["btc_cycles/halvings.json"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -20,6 +21,7 @@ black = {version = "^24.2.0", extras = ["jupyter"]}
 flake8 = "^7.0.0"
 ipykernel = "^6.29.3"
 flake8-rst-docstrings = "^0.3.0"
+nbconvert = "^7.16.3"
 
 [build-system]
 requires = ["poetry-core"]
