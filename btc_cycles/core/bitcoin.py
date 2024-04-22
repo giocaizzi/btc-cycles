@@ -21,7 +21,7 @@ class Bitcoin:
         # get price data
         self.prices = Prices().data
         # predicted halving date
-        _, self.predicted_halving_date = get_halving_data()
+        self.predicted_halving_date, _ = get_halving_data()
 
     def plot(self, kind="static", **kwargs):
         """plot

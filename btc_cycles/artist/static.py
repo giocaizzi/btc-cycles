@@ -27,7 +27,7 @@ class StaticArtist:
 
         Create a new column in the DataFrame with the color
         """
-        self.bitcoin.data["color"] = self.bitcoin.data["distance_ath_perc"].apply(
+        self.bitcoin.prices["color"] = self.bitcoin.prices["distance_ath_perc"].apply(
             lambda x: mcolors.to_hex(self.colorbar.cmap(self.colorbar.norm(x)))
         )
 

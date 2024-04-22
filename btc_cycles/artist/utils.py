@@ -52,7 +52,7 @@ class ProgressLabels:
                 bitcoin.prices[
                     abs((bitcoin.prices["cycle_progress"] - progress)) < 0.0005
                 ]
-                .groupby("cycle")
+                .groupby("cycle_id")
                 .first()
                 .reset_index()
             )
@@ -64,12 +64,12 @@ class ProgressLabels:
         # concat groupby objects as formatted strings
         self.labels = self.labels.groupby("cycle_progress")["Date"].apply(
             lambda x: "".join(
-                f"{label}\n" for label in x["Date"].dt.strftime("%d-%m-%Y").to_list()
+                f"{label}\n" for label in x.dt.strftime("%d-%m-%Y").to_list()
             )
         )
 
         self.predicted_halving_str = r"$\bf{{{} \: (predicted)}}$".format(
-            bitcoin.predicted_halving.strftime("%d-%m-%Y")
+            bitcoin.predicted_halving_date.strftime("%d-%m-%Y")
         )
 
         self.labels.iloc[0] = self.labels.iloc[0] + self.predicted_halving_str
