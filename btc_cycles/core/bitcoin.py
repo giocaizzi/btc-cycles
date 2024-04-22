@@ -2,7 +2,7 @@
 
 from .prices import Prices
 from .halvings import get_halving_data
-from .artists import Artist
+from ..artist import Artist
 
 
 # TODO: for now its assuming that the
@@ -14,12 +14,14 @@ class Bitcoin:
 
     Attributes:
         prices (DataFrame): bitcoin prices
+        predicted_halving_date (datetime): predicted halving date
     """
 
     def __init__(self):
         # get price data
         self.prices = Prices().data
         # predicted halving date
+        _, self.predicted_halving_date = get_halving_data()
 
     def plot(self, kind="static", **kwargs):
         """plot

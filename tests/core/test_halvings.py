@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from btc_cycles.halvings import Halvings
+from btc_cycles.core.halvings import Halvings
 
 
 def test_Halving():

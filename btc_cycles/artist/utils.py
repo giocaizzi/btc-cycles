@@ -1,5 +1,7 @@
 """common utils for artists"""
 
+from __future__ import annotations
+
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import pandas as pd

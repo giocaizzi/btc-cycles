@@ -8,7 +8,7 @@ import pandas as pd
 URL = "https://api.watcher.guru/bitcoinhalving/predictions"
 
 
-def get_halving_data():
+def get_halving_data() -> tuple:
     """Get halving predicted date
 
     Returns:
@@ -29,7 +29,7 @@ class Halvings:
 
     def __init__(self):
         # load json data into DataFrame
-        with open("btc_cycles/halvings.json", "r") as f:
+        with open("btc_cycles/core/halvings.json", "r") as f:
             self.data = pd.DataFrame(json.load(f)).T
         # convert date to datetime
         self.data["date"] = pd.to_datetime(self.data["date"])

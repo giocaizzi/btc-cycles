@@ -1,5 +1,5 @@
 """btc_cycles"""
 
-from .bitcoin import Bitcoin
+from .core import Bitcoin
 
 __all__ = ["Bitcoin"]
