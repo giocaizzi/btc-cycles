@@ -1,6 +1,7 @@
 """artist module"""
 
-from ..bitcoin import Bitcoin
+from __future__ import annotations
+
 from .static_artist import StaticArtist
 
 
