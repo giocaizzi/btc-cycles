@@ -42,4 +42,4 @@ class Artist:
         Args:
             \\*\\*kwargs: additional keyword arguments to plotting method
         """
-        self.artist.plot(**kwargs)
+        return self.artist.plot(**kwargs)

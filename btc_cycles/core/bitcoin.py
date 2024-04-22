@@ -1,5 +1,7 @@
 """bitcoin module"""
 
+from __future__ import annotations
+
 from .prices import Prices
 from .halvings import get_halving_data
 from ..artist import Artist
@@ -23,11 +25,14 @@ class Bitcoin:
         # predicted halving date
         self.predicted_halving_date, _ = get_halving_data()
 
-    def plot(self, kind="static", **kwargs):
+    def plot(self, kind="static", **kwargs) -> matplotlib.figure.Figure:
         """plot
 
         Args:
             kind (str, optional): plot kind. Defaults to "static".
             \\*\\*kwargs: additional keyword arguments to plotting method
+
+        Returns:
+            matplotlib.figure.Figure: figure object
         """
-        Artist(kind, self).plot(**kwargs)
+        return Artist(kind, self).plot(**kwargs)
