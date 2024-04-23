@@ -206,5 +206,9 @@ class StaticArtist:
             color="darkgrey",
         )
 
+        # necessary althought the warning
+        # otherwise a savefig on the fig would cut
+        self.f.tight_layout()
+
         # return figure
         return self.f
