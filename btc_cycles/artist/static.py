@@ -82,7 +82,7 @@ class StaticArtist:
         )
 
         # # Plot ATHs
-        aths = self.bitcoin.prices[self.bitcoin.prices["distance_ath_perc"] == 1]
+        aths = self.bitcoin.prices[self.bitcoin.prices["distance_ath_perc"] == 0]
         self.axes.scatter(
             aths["cycle_progress"] * 2 * np.pi,
             aths["Close"],

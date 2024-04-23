@@ -21,7 +21,7 @@ def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe["ATH"] = dataframe["Close"].cummax()
     # find distance from ATH in percentage
     dataframe["distance_ath_perc"] = (
-        dataframe["Close"] / dataframe["ATH"]
+        dataframe["Close"] - dataframe["ATH"]
     ) / dataframe["ATH"]
     return dataframe
 
