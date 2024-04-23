@@ -22,7 +22,13 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install .
+        run: |
+          pip install .
+          pip install jupyter nbconvert
+
+      - name: Run notebook
+        run: jupyter nbconvert --to notebook --execute --inplace bitcoin.ipynb
+
 
       - name: Get current time
         uses: josStorer/get-current-time@v2
