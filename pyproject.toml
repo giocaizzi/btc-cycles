@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "btc-cycles"
-version = "0.2.1"
+version = "0.2.2"
 description = "Track Bitcoin price over halving cycles"
 authors = ["giocaizzi <giocaizzi@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-include = ["btc_cycles/halvings.json"]
+include = ["btc_cycles/core/halvings.json"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
