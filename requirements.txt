@@ -1,6 +1,0 @@
-ipykernel
-nbconvert
-cryptocmd
-matplotlib
-numpy
-pandas
