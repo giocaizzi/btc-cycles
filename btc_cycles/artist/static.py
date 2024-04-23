@@ -32,9 +32,9 @@ class StaticArtist:
 
         Create a new column in the DataFrame with the color
         """
-        self.bitcoin.prices["color"] = self.bitcoin.prices[
-            "distance_ath_perc"
-        ].apply(lambda x: mcolors.to_hex(self.colorbar.cmap(self.colorbar.norm(x))))
+        self.bitcoin.prices["color"] = self.bitcoin.prices["distance_ath_perc"].apply(
+            lambda x: mcolors.to_hex(self.colorbar.cmap(self.colorbar.norm(x)))
+        )
 
     def plot(self):
         """plot"""
@@ -206,7 +206,5 @@ class StaticArtist:
             color="darkgrey",
         )
 
-        self.f.tight_layout()
-        
         # return figure
         return self.f
