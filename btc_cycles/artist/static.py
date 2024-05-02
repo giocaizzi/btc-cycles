@@ -44,6 +44,56 @@ class StaticArtist:
         )
 
         # Plot data
+        self.add_data()
+
+        # now point
+        self.add_now()
+
+        # halving
+        self.add_halving()
+
+        # # Plot ATHs
+        self.add_aths()
+
+        # # # plot bottoms
+        # self.add_bottoms()
+
+        # format graph
+        self.format_chart()
+
+        # legend
+        self.add_legend()
+
+        # colorbar
+        self.add_colorbar()
+
+        # image creation date and copyright
+        self.add_watermark()
+
+        # necessary althought the warning
+        # otherwise a savefig on the fig would cut
+        self.f.tight_layout()
+
+        # return figure
+        return self.f
+
+    def add_watermark(self) -> None:
+        """add watermark to plot"""
+        date = datetime.datetime.now(datetime.UTC)
+        date_text = date.strftime("%Y-%m-%d %H:%M UTC")
+        self.axes.annotate(
+            (f"{date_text}\n" f"© giocaizzi/btc-cycles : {version('btc-cycles')}"),
+            xy=(0.5, 0.33),
+            xycoords="axes fraction",
+            textcoords="axes fraction",
+            fontsize=8,
+            ha="center",
+            va="center",
+            color="darkgrey",
+        )
+
+    def add_data(self) -> None:
+        """add data to plot"""
         self.axes.scatter(
             self.bitcoin.prices["cycle_progress"] * 2 * np.pi,
             self.bitcoin.prices["Close"].to_numpy(),
@@ -53,61 +103,16 @@ class StaticArtist:
             zorder=9,
         )
 
-        # now
-        self.axes.scatter(
-            self.bitcoin.prices["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
-            self.bitcoin.prices["Close"].to_numpy()[-1],
-            marker="D",
-            c=self.bitcoin.prices["color"].to_numpy()[-1],
-            s=50,
-            zorder=8,
-        )
-        self.axes.vlines(
-            self.bitcoin.prices["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
-            100,
-            self.bitcoin.prices["Close"].to_numpy()[-1],
-            color="k",
-            linestyle="--",
-            zorder=8,
-        )
-
-        # halving
-        self.axes.vlines(
-            0,
-            100,
-            1000000,
-            color="lightgreen",
-            linewidth=3,
-            zorder=0,
-        )
-
-        # # Plot ATHs
-        aths = self.bitcoin.prices[self.bitcoin.prices["distance_ath_perc"] == 0]
-        self.axes.scatter(
-            aths["cycle_progress"] * 2 * np.pi,
-            aths["Close"],
-            marker="x",
-            c="k",
-            s=20,
-            zorder=10,
-        )
-
-        # # plot bottoms
-        # axes.scatter(
-        #     cycle_bottoms["cycle_progress"] * 2 * np.pi,
-        #     cycle_bottoms["Close"],
-        #     marker="o",
-        #     c="r",
-        #     s=20,
-        #     zorder=10,
-        # )
-
-        # format graph
+    def format_chart(self) -> None:
+        """format axes"""
         # Set y-axis to logarithmic scale
         self.axes.set_rscale("log")
-        # # Set direction (1 for clockwise, -1 for counterclockwise)
+
+        # Set direction (1 for clockwise, -1 for counterclockwise)
         self.axes.set_theta_direction(-1)
         self.axes.set_theta_offset(np.pi / 2.0)
+
+        # Set r gridlines
         self.axes.set_rgrids(
             [
                 100,
@@ -124,35 +129,84 @@ class StaticArtist:
                 "1M",
             ],
         )
-        # axes.set_xticklabels(
-        #     [
-        #         "Halving day",
-        #         "",
-        #         "",
-        #         "",
-        #         "Mid-cycle",
-        #     ]
 
-        # )
+        # Set xticks and labels
         self.axes.set_xticks(
             np.linspace(0, 2 * np.pi, 4, endpoint=False),
         )
         self.axes.set_xticklabels(
             ProgressLabels(self.bitcoin).labels,
-            fontsize=10,
-        )
-        self.axes.set_rlabel_position(0)
-        self.axes.set_ylabel("Price (USD)", rotation=0)
-        self.axes.yaxis.set_label_coords(0.5, 1.01)
-        self.axes.tick_params(axis="both", which="major", pad=30)
-        [spine.set_edgecolor("lightgrey") for spine in self.axes.spines.values()]
-        self.axes.set_title(
-            "Bitcoin price halving cycles",
-            fontdict={"fontsize": 15, "fontweight": "bold"},
-            pad=20,
+            fontsize=8,
         )
 
-        # legend
+        # r label
+        self.axes.set_rlabel_position(0)
+
+        # y label
+        self.axes.set_ylabel("Price (USD)", rotation=0)
+        self.axes.yaxis.set_label_coords(0.5, 1.01)
+
+        # ticks params
+        self.axes.tick_params(axis="both", which="major", pad=30)
+
+        # edge color
+        [spine.set_edgecolor("lightgrey") for spine in self.axes.spines.values()]
+
+    def add_bottoms(self) -> None:
+        """add bottoms to plot"""
+        self.axes.scatter(
+            self.bitcoin.prices["cycle_progress"] * 2 * np.pi,
+            self.bitcoin.prices["Close"],
+            marker="o",
+            c="r",
+            s=20,
+            zorder=10,
+        )
+
+    def add_aths(self) -> None:
+        """add all time highs to plot"""
+        aths = self.bitcoin.prices[self.bitcoin.prices["distance_ath_perc"] == 0]
+        self.axes.scatter(
+            aths["cycle_progress"] * 2 * np.pi,
+            aths["Close"],
+            marker="x",
+            c="k",
+            s=20,
+            zorder=10,
+        )
+
+    def add_halving(self) -> None:
+        """add halving to plot"""
+        self.axes.vlines(
+            0,
+            100,
+            1000000,
+            color="lightgreen",
+            linewidth=3,
+            zorder=0,
+        )
+
+    def add_now(self) -> None:
+        self.axes.scatter(
+            self.bitcoin.prices["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
+            self.bitcoin.prices["Close"].to_numpy()[-1],
+            marker="D",
+            c=self.bitcoin.prices["color"].to_numpy()[-1],
+            s=50,
+            zorder=8,
+        )
+        # now line
+        self.axes.vlines(
+            self.bitcoin.prices["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
+            100,
+            self.bitcoin.prices["Close"].to_numpy()[-1],
+            color="k",
+            linestyle="--",
+            zorder=8,
+        )
+
+    def add_legend(self) -> None:
+        """add legend and title to plot"""
         self.axes.legend(
             [
                 "BTC/USD",
@@ -170,7 +224,15 @@ class StaticArtist:
             frameon=False,
         )
 
-        # colorbar
+        # title
+        self.axes.set_title(
+            "Bitcoin price halving cycles",
+            fontdict={"fontsize": 15, "fontweight": "bold"},
+            pad=20,
+        )
+
+    def add_colorbar(self) -> None:
+        """add colorbar to plot"""
         sm = plt.cm.ScalarMappable(cmap=self.colorbar.cmap, norm=self.colorbar.norm)
         inset_ax = inset_axes(
             self.axes,
@@ -181,7 +243,6 @@ class StaticArtist:
             bbox_transform=self.axes.transAxes,
             borderpad=0,
         )
-
         cbar = self.f.colorbar(
             sm,
             cax=inset_ax,
@@ -190,25 +251,3 @@ class StaticArtist:
         )
         cbar.ax.set_yticklabels(["ATH", "-20%", "-40%", "-60%", "-80%", "-100%"])
         inset_ax.set_title("Distance from ATH", fontdict={"fontweight": "bold"}, pad=10)
-
-        date = datetime.datetime.utcnow()
-        date_text = date.strftime("%Y-%m-%d %H:%M UTC")
-
-        # date, and copyright
-        self.axes.annotate(
-            (f"{date_text}\n" f"© giocaizzi/btc-cycles : {version('btc-cycles')}"),
-            xy=(0.5, 0.33),
-            xycoords="axes fraction",
-            textcoords="axes fraction",
-            fontsize=8,
-            ha="center",
-            va="center",
-            color="darkgrey",
-        )
-
-        # necessary althought the warning
-        # otherwise a savefig on the fig would cut
-        self.f.tight_layout()
-
-        # return figure
-        return self.f
