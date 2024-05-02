@@ -18,9 +18,11 @@ def test_colorbar():
 def test_progress_labels():
     """test progress labels"""
     progress_labels = ProgressLabels(TEST)
+
     # test labels
     assert progress_labels.labels is not None
     assert isinstance(progress_labels.labels, pd.Series)
+    
     # test predicted halving string
     assert progress_labels.predicted_halving_str is not None
     assert isinstance(progress_labels.predicted_halving_str, str)
