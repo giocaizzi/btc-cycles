@@ -49,21 +49,33 @@ class Prices:
     Prices class to get historical OHLC data and halving data,
     and process it.
 
-    Gets historical OHLC data using `cryptocmd` package, that
-    scrapes data from CoinMarketCap.
+    Gets historical OHLC data using desired `source`.
+
+    The default source `coinmarketcap-free`, gets data from
+    CoinMarketCap, without authentication and using the `cryptocmd` package,
+    a wrapper to the API. Without authentication, the data returns a limited
+    number of data points.
+
+    The source `cryptocompare` uses the `cryptocompare` package to get data.
+    Requires an API key.
 
     Sets the following metrics on the OHLC dataframe:
     - ATH
     - distance from ATH in percentage
     - cycle progress
 
+    Args:
+        source (str): source to get historical OHLC data
+
     Attributes:
+        source(str): source to get historical OHLC data
         coin (str): coin symbol
         data (DataFrame): historical OHLC data
         halvings (DataFrame): halving data
     """
 
-    def __init__(self):
+    def __init__(self, source: str = "coinmarketcap-free"):
+        self.source = source
         self.coin = "BTC"
         # get price data
         self.data = self._get_data()
@@ -80,9 +92,12 @@ class Prices:
         Returns:
             DataFrame: OHLC data
         """
-        scraper = CmcScraper(self.coin)
-        scraper.get_data()
-        return scraper.get_dataframe()[["Date", "Close"]]
+        if self.source == "cryptocompare":
+            raise NotImplementedError("cryptocompare source is not implemented yet")
+        else:
+            scraper = CmcScraper(self.coin)
+            scraper.get_data()
+            return scraper.get_dataframe()[["Date", "Close"]]
 
     def _fmt_df(self) -> None:
         """Format DataFrame"""
