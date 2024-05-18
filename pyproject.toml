@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "btc-cycles"
-version = "0.2.3"
+version = "0.3.0"
 description = "Track Bitcoin price over halving cycles"
 authors = ["giocaizzi <giocaizzi@gmail.com>"]
 license = "MIT"
@@ -13,6 +13,7 @@ cryptocmd = "^0.6.4"
 matplotlib = "^3.8.3"
 numpy = "^1.26.4"
 pandas = "^2.2.1"
+cryptocompare = "^0.7.6"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"

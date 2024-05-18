@@ -1,7 +1,9 @@
 """prices module"""
 
 import pandas as pd
+import datetime as dt
 from cryptocmd import CmcScraper
+import cryptocompare
 
 from .halvings import Halvings
 
@@ -44,14 +46,14 @@ def _find_cycle_progress(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 class Prices:
-    """Prices
+    """Get historical OHLC data and set metrics
 
     Prices class to get historical OHLC data and halving data,
     and process it.
 
     Gets historical OHLC data using desired `source`.
 
-    The default source `coinmarketcap-free`, gets data from
+    The source `coinmarketcap-free`, gets data from
     CoinMarketCap, without authentication and using the `cryptocmd` package,
     a wrapper to the API. Without authentication, the data returns a limited
     number of data points.
@@ -66,6 +68,7 @@ class Prices:
 
     Args:
         source (str): source to get historical OHLC data
+        api_key (str): API key for source
 
     Attributes:
         source(str): source to get historical OHLC data
@@ -74,11 +77,12 @@ class Prices:
         halvings (DataFrame): halving data
     """
 
-    def __init__(self, source: str = "coinmarketcap-free"):
+    def __init__(self, currency: str, source: str, api_key: str):
         self.source = source
         self.coin = "BTC"
+        self.fiat = currency
         # get price data
-        self.data = self._get_data()
+        self.data = self._get_data(api_key=api_key)
         # get halving data
         self.halvings = Halvings().data
         # format DataFrame
@@ -86,16 +90,24 @@ class Prices:
         # set metrics
         self._set_metrics()
 
-    def _get_data(self) -> pd.DataFrame:
+    def _get_data(self, api_key: str) -> pd.DataFrame:
         """Get historical OHLC data
 
         Returns:
             DataFrame: OHLC data
         """
         if self.source == "cryptocompare":
-            raise NotImplementedError("cryptocompare source is not implemented yet")
+            cryptocompare.cryptocompare._set_api_key_parameter(api_key)
+            data = cryptocompare.get_historical_price_day_from(
+                coin=self.coin, currency=self.fiat, fromTs=dt.datetime(2009, 1, 1)
+            )
+            data = pd.DataFrame(data)
+            data["time"] = pd.to_datetime(data["time"], unit="s")
+            data.rename({"time": "Date", "close": "Close"}, axis=1, inplace=True)
+            return data[["Date", "Close"]]
+
         else:
-            scraper = CmcScraper(self.coin)
+            scraper = CmcScraper(self.coin, fiat=self.fiat)
             scraper.get_data()
             return scraper.get_dataframe()[["Date", "Close"]]
 

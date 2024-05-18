@@ -439,6 +439,19 @@ requests = "*"
 tablib = "*"
 
 [[package]]
+name = "cryptocompare"
+version = "0.7.6"
+description = "Wrapper for CryptoCompare.com"
+optional = false
+python-versions = ">=3"
+files = [
+    {file = "cryptocompare-0.7.6.tar.gz", hash = "sha256:0183d14152b4f156cc2da9e5a769fcdd1ac144065109441a2e1c6ab0b4573edb"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[[package]]
 name = "cycler"
 version = "0.12.1"
 description = "Composable style cycles"
@@ -1792,4 +1805,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "cf51a23a71db0fbb10e5e5b57b1c448a3cfb644f951d343d3caa75a5ff6495a1"
+content-hash = "99b5afaa760c695e1e260ad55cae116192aead3ba2fc04d34ba6238c797c18a7"

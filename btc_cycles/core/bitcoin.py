@@ -14,6 +14,19 @@ from ..artist import Artist
 class Bitcoin:
     """Bitcoin
 
+    Bitcoin class stores bitcoin prices and halvings data.
+
+    Available data sources:
+    - coinmarketcap-free
+    - cryptocompare (requires API key)
+
+    Plot bitcoin prices and halvings data.
+
+    Args:
+        source (str, optional): data source. Defaults to "coinmarketcap-free".
+        currency (str, optional): currency. Defaults to "USD".
+        api_key (str, optional): API key. Defaults to None.
+
     Attributes:
         prices (DataFrame): bitcoin prices
         halvings (DataFrame): bitcoin halvings
@@ -21,9 +34,14 @@ class Bitcoin:
         predicted_halving_block (int): predicted halving block
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        source: str = "coinmarketcap-free",
+        currency: str = "USD",
+        api_key: str = None,
+    ):
         # get processed price data
-        self.prices = Prices().data
+        self.prices = Prices(currency=currency, source=source, api_key=api_key).data
         # save halving data
         self.halvings = Halvings().data
         # predicted next halving date and block
