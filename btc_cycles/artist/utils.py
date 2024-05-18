@@ -49,7 +49,7 @@ class ProgressLabels:
         self.labels = []
         self._get_moments(bitcoin)
 
-    def _get_moments(self, bitcoin)-> None:
+    def _get_moments(self, bitcoin) -> None:
         """get moments for each progress value"""
         # for each progress value, get the corresponding dates
         # (for each cycle_id get the first date matching the progress)
@@ -77,7 +77,7 @@ class ProgressLabels:
 
         self._add_predicted(bitcoin)
 
-    def _add_predicted(self, bitcoin)-> None:
+    def _add_predicted(self, bitcoin) -> None:
         """adds predicted halving date to labels"""
         self.predicted_halving_str = r"$\bf{{{} \: (predicted)}}$".format(
             bitcoin.predicted_halving_date.strftime("%d-%m-%Y")

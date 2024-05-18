@@ -9,7 +9,10 @@ URL = "https://api.watcher.guru/bitcoinhalving/predictions"
 
 
 def get_halving_data() -> tuple:
-    """Get halving predicted date
+    """Get next halving data
+
+    Gets the next halving data (date, blocknumber)
+    from the watcher.guru API.
 
     Returns:
         tuple: date (datetime), block (int)
@@ -24,6 +27,9 @@ def get_halving_data() -> tuple:
 
 def update_predicted_halving_date(data: pd.DataFrame) -> pd.DataFrame:
     """Update predicted halving date
+
+    Update the predicted halving date in the halving dataframe
+    by matching the block number.
 
     Args:
         data (DataFrame): halving data
@@ -41,6 +47,8 @@ def update_predicted_halving_date(data: pd.DataFrame) -> pd.DataFrame:
 
 class Halvings:
     """Halvings
+
+    Halvings class that contains halving cycles data.
 
     Attributes:
         data (pd.DataFrame): halving data

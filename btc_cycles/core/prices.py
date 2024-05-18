@@ -44,7 +44,24 @@ def _find_cycle_progress(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 class Prices:
-    """Prices"""
+    """Prices
+
+    Prices class to get historical OHLC data and halving data,
+    and process it.
+
+    Gets historical OHLC data using `cryptocmd` package, that
+    scrapes data from CoinMarketCap.
+
+    Sets the following metrics on the OHLC dataframe:
+    - ATH
+    - distance from ATH in percentage
+    - cycle progress
+
+    Attributes:
+        coin (str): coin symbol
+        data (DataFrame): historical OHLC data
+        halvings (DataFrame): halving data
+    """
 
     def __init__(self):
         self.coin = "BTC"

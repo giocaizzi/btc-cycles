@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from .prices import Prices
-from .halvings import get_halving_data
+from .halvings import get_halving_data, Halvings
 from ..artist import Artist
 
 
@@ -16,14 +16,18 @@ class Bitcoin:
 
     Attributes:
         prices (DataFrame): bitcoin prices
+        halvings (DataFrame): bitcoin halvings
         predicted_halving_date (datetime): predicted halving date
+        predicted_halving_block (int): predicted halving block
     """
 
     def __init__(self):
-        # get price data
+        # get processed price data
         self.prices = Prices().data
-        # predicted halving date
-        self.predicted_halving_date, _ = get_halving_data()
+        # save halving data
+        self.halvings = Halvings().data
+        # predicted next halving date and block
+        self.predicted_halving_date, self.predicted_halving_block = get_halving_data()
 
     def plot(self, kind="static", **kwargs) -> matplotlib.figure.Figure:
         """plot
