@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from typing import Union
+import datetime
 
 from .prices import Prices
 from .halvings import get_halving_data, Halvings
@@ -58,7 +59,8 @@ class Bitcoin:
 
         Args:
             kind (str, optional): plot kind. Defaults to "static".
-            from_date (Union[str, datetime.datetime], optional): start date. Defaults to None.
+            from_date (Union[str, datetime.datetime], optional): start date. Defaults
+                to None, which fetches all data.
             \\*\\*plotting_kwargs: additional keyword arguments to plotting method
 
         Returns:
