@@ -40,6 +40,6 @@ class Artist:
         """wrapper for plot method of artist
 
         Args:
-            \\*\\*kwargs: additional keyword arguments to plotting method
+            \\*\\*kwargs: keyword arguments to plotting method
         """
         return self.artist.plot(**kwargs)

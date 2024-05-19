@@ -3,6 +3,7 @@
 from __future__ import annotations
 import copy
 import datetime
+from typing import Union
 from importlib.metadata import version
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,15 +37,19 @@ class StaticArtist:
             lambda x: mcolors.to_hex(self.colorbar.cmap(self.colorbar.norm(x)))
         )
 
-    def plot(self):
-        """plot"""
+    def plot(self, from_date: Union[str, datetime.datetime]):
+        """plot
+
+        Args:
+            from_date (Union[str, datetime.datetime]): start date
+        """
         # Create a polar subplot
         self.f, self.axes = plt.subplots(
             1, 1, subplot_kw=dict(polar=True), figsize=(10, 10)
         )
 
         # Plot data
-        self.add_data()
+        self.add_data(from_date=from_date)
 
         # now point
         self.add_now()
@@ -92,8 +97,21 @@ class StaticArtist:
             color="darkgrey",
         )
 
-    def add_data(self) -> None:
-        """add data to plot"""
+    def add_data(self, from_date: Union[str, datetime.datetime]) -> None:
+        """add data to plot
+
+        This method filters the data inplace.
+
+        Args:
+            from_date (Union[str, datetime.datetime]): start date
+        """
+        if from_date is not None:
+            # filter data
+            self.bitcoin.prices = self.bitcoin.prices[
+                self.bitcoin.prices.Date >= from_date
+            ]
+
+        # plot data
         self.axes.scatter(
             self.bitcoin.prices["cycle_progress"] * 2 * np.pi,
             self.bitcoin.prices["Close"].to_numpy(),
@@ -112,22 +130,42 @@ class StaticArtist:
         self.axes.set_theta_direction(-1)
         self.axes.set_theta_offset(np.pi / 2.0)
 
+        grid_intervals = [
+            0.001,
+            0.01,
+            0.1,
+            1,
+            10,
+            100,
+            1000,
+            10000,
+            100000,
+            1000000,
+        ]
+
+        labels = [
+            "0.001",
+            "0.01",
+            "0.1",
+            "1",
+            "10",
+            "100",
+            "1k",
+            "10k",
+            "100k",
+            "1M",
+        ]
+
+        start_index = next(
+            i
+            for i, v in enumerate(grid_intervals)
+            if v >= self.bitcoin.prices.Close.min()
+        )
+
         # Set r gridlines
         self.axes.set_rgrids(
-            [
-                100,
-                1000,
-                10000,
-                100000,
-                1000000,
-            ],
-            labels=[
-                "100",
-                "1k",
-                "10k",
-                "100k",
-                "1M",
-            ],
+            grid_intervals[start_index:],
+            labels=labels[start_index:],
         )
 
         # Set xticks and labels
@@ -179,7 +217,7 @@ class StaticArtist:
         """add halving to plot"""
         self.axes.vlines(
             0,
-            100,
+            self.bitcoin.prices["Close"].min(),
             1000000,
             color="lightgreen",
             linewidth=3,
@@ -198,9 +236,9 @@ class StaticArtist:
         # now line
         self.axes.vlines(
             self.bitcoin.prices["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
-            100,
+            self.bitcoin.prices["Close"].min(),
             self.bitcoin.prices["Close"].to_numpy()[-1],
-            color="k",
+            color="darkgrey",
             linestyle="--",
             zorder=8,
         )

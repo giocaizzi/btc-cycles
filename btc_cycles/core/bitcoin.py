@@ -1,6 +1,7 @@
 """bitcoin module"""
 
 from __future__ import annotations
+from typing import Union
 
 from .prices import Prices
 from .halvings import get_halving_data, Halvings
@@ -47,14 +48,23 @@ class Bitcoin:
         # predicted next halving date and block
         self.predicted_halving_date, self.predicted_halving_block = get_halving_data()
 
-    def plot(self, kind="static", **kwargs) -> matplotlib.figure.Figure:
+    def plot(
+        self,
+        kind: str = "static",
+        from_date: Union[str, datetime.datetime] = None,
+        **plotting_kwargs,
+    ) -> matplotlib.figure.Figure:
         """plot
 
         Args:
             kind (str, optional): plot kind. Defaults to "static".
-            \\*\\*kwargs: additional keyword arguments to plotting method
+            from_date (Union[str, datetime.datetime], optional): start date. Defaults to None.
+            \\*\\*plotting_kwargs: additional keyword arguments to plotting method
 
         Returns:
             matplotlib.figure.Figure: figure object
         """
-        return Artist(kind, self).plot(**kwargs)
+        # update plotting kwargs
+        plotting_kwargs.update({"from_date": from_date})
+        # plot
+        return Artist(kind=kind, bitcoin=self).plot(**plotting_kwargs)
