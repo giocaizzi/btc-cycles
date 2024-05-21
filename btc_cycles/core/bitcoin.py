@@ -59,9 +59,10 @@ class Bitcoin:
 
         Args:
             kind (str, optional): plot kind. Defaults to "static".
-            from_date (Union[str, datetime.datetime], optional): start date. Defaults
-                to None, which fetches all data.
-            \\*\\*plotting_kwargs: additional keyword arguments to plotting method
+            from_date (Union[str, datetime.datetime], optional): start date. 
+                Defaults to None, which fetches all data.
+            \\*\\*plotting_kwargs: additional keyword arguments to Artist's 
+                plotting method.
 
         Returns:
             matplotlib.figure.Figure: figure object
