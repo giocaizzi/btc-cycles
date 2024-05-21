@@ -1,6 +1,7 @@
 """artist module"""
 
 from __future__ import annotations
+from typing import Union, Literal
 
 from .static import StaticArtist
 
@@ -8,7 +9,7 @@ from .static import StaticArtist
 class Artist:
     """Artist for plotting"""
 
-    def __init__(self, kind: str = "static", bitcoin: Bitcoin = None):
+    def __init__(self, kind: str = "static", bitcoin: Bitcoin = None, theme: Union[Literal["light", "dark"], dict] = "light"):
         """Artist
 
         Artist for plotting, either static or dynamic.
@@ -17,6 +18,7 @@ class Artist:
         Args:
             kind (str, optional): _description_. Defaults to "static".
             bitcoin (Bitcoin, optional): _description_. Defaults to None.
+            theme (Union[Literal["light", "dark"], dict], optional): _description_. Defaults to "light".
 
         Raises:
             NotImplementedError: _description_
@@ -25,7 +27,7 @@ class Artist:
         self.artist = None
         if kind == "static":
             self._kind = kind
-            self.artist = StaticArtist(bitcoin)
+            self.artist = StaticArtist(bitcoin,theme=theme)
         elif kind == "dynamic":
             # TODO: implement dynamic artist (plotly)
             raise NotImplementedError

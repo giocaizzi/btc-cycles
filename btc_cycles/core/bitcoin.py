@@ -1,7 +1,7 @@
 """bitcoin module"""
 
 from __future__ import annotations
-from typing import Union
+from typing import Union, Literal
 import datetime
 
 from .prices import Prices
@@ -53,6 +53,7 @@ class Bitcoin:
         self,
         kind: str = "static",
         from_date: Union[str, datetime.datetime] = None,
+        theme : Union[Literal["light", "dark"],dict] = "light",
         **plotting_kwargs,
     ) -> matplotlib.figure.Figure:
         """plot
@@ -63,6 +64,11 @@ class Bitcoin:
                 Defaults to None, which fetches all data.
             \\*\\*plotting_kwargs: additional keyword arguments to Artist's 
                 plotting method.
+            theme (Union[Literal["light", "dark"],dict], optional): theme 
+                for the plot. Defaults to "light". If a dictionary is passed,
+                it should contain the following keys:
+                - "background_color" (str): background color
+                - ...
 
         Returns:
             matplotlib.figure.Figure: figure object
@@ -70,4 +76,4 @@ class Bitcoin:
         # update plotting kwargs
         plotting_kwargs.update({"from_date": from_date})
         # plot
-        return Artist(kind=kind, bitcoin=self).plot(**plotting_kwargs)
+        return Artist(kind=kind, bitcoin=self,theme=theme).plot(**plotting_kwargs)

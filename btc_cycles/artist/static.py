@@ -3,7 +3,7 @@
 from __future__ import annotations
 import copy
 import datetime
-from typing import Union
+from typing import Union, Literal
 from importlib.metadata import version
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,6 +11,25 @@ import matplotlib.colors as mcolors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from .utils import ColorBar, ProgressLabels
+
+THEMES = {
+    "light": {
+        "background": "white",
+        "text": "black",
+        "grid": "lightgrey",
+        "now_line": "darkgrey",
+        "halving_line": "lightgreen",
+        "ath_marker": "black",
+    },
+    "dark": {
+        "background": "black",
+        "text": "white",
+        "grid": "darkgrey",
+        "now_line": "lightgrey",
+        "halving_line": "lightgreen",
+        "ath_marker": "white",
+    },
+}
 
 
 class StaticArtist:
@@ -21,18 +40,34 @@ class StaticArtist:
     Args:
         bitcoin (Bitcoin): bitcoin object
         colorbar (ColorBar): color bar object
+        theme (Union[Literal["light", "dark"], dict], optional): theme. Defaults to "light".
+
+    Attributes:
+        bitcoin (Bitcoin): bitcoin object
+        colorbar (ColorBar): color bar object
+        theme (Union[Literal["light", "dark"], dict]): theme
+
     """
 
-    def __init__(self, bitcoin: Bitcoin):
+    def __init__(
+        self, bitcoin: Bitcoin, theme: Union[Literal["light", "dark"], dict] = "light"
+    ):
         self.bitcoin = copy.copy(bitcoin)
         self.colorbar = ColorBar(self.bitcoin)
         self._set_colors()
+
+        # set theme
+        if isinstance(theme, str):
+            self.theme = THEMES[theme]
+        else:
+            self.theme = theme
 
     def _set_colors(self):
         """set colors
 
         Create a new column in the DataFrame with the color
         """
+        # TODO: this is a colorbar method
         self.bitcoin.prices["color"] = self.bitcoin.prices["distance_ath_perc"].apply(
             lambda x: mcolors.to_hex(self.colorbar.cmap(self.colorbar.norm(x)))
         )
@@ -47,6 +82,9 @@ class StaticArtist:
         self.f, self.axes = plt.subplots(
             1, 1, subplot_kw=dict(polar=True), figsize=(10, 10)
         )
+        # Set background color
+        self.f.set_facecolor(self.theme["background"])
+        self.axes.set_facecolor(self.theme["background"])
 
         # Plot data
         self.add_data(from_date=from_date)
@@ -175,6 +213,7 @@ class StaticArtist:
         self.axes.set_xticklabels(
             ProgressLabels(self.bitcoin).labels,
             fontsize=8,
+            color=self.theme["text"],
         )
 
         # r label
@@ -208,7 +247,7 @@ class StaticArtist:
             aths["cycle_progress"] * 2 * np.pi,
             aths["Close"],
             marker="x",
-            c="k",
+            c=self.theme["ath_marker"],
             s=20,
             zorder=10,
         )
@@ -219,7 +258,7 @@ class StaticArtist:
             0,
             self.bitcoin.prices["Close"].min(),
             1000000,
-            color="lightgreen",
+            color=self.theme["halving_line"],
             linewidth=3,
             zorder=0,
         )
@@ -238,14 +277,14 @@ class StaticArtist:
             self.bitcoin.prices["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
             self.bitcoin.prices["Close"].min(),
             self.bitcoin.prices["Close"].to_numpy()[-1],
-            color="darkgrey",
+            color=self.theme["now_line"],
             linestyle="--",
             zorder=8,
         )
 
     def add_legend(self) -> None:
         """add legend and title to plot"""
-        self.axes.legend(
+        legend = self.axes.legend(
             [
                 "BTC/USD",
                 "Today BTC/USD Close",
@@ -254,20 +293,24 @@ class StaticArtist:
                 "All time high (ATH)",
             ],
             loc="upper left",
-            bbox_to_anchor=(-0.1, 1),
+            bbox_to_anchor=(-0.075, 1.05),
             fontsize=10,
-            title="$\\bf{Legend}$",
+            # title="$\\bf{Legend}$",
             title_fontsize="13",
             # labelspacing=1.5,
             frameon=False,
         )
+        # Set the color of legend text
+        for text in legend.get_texts():
+            text.set_color(self.theme["text"])
 
         # title
-        self.axes.set_title(
+        title = self.axes.set_title(
             "Bitcoin price halving cycles",
             fontdict={"fontsize": 15, "fontweight": "bold"},
             pad=20,
         )
+        title.set_color(self.theme["text"])
 
     def add_colorbar(self) -> None:
         """add colorbar to plot"""
@@ -277,7 +320,7 @@ class StaticArtist:
             width="2.5%",
             height="25%",
             # loc="upper right",
-            bbox_to_anchor=(0, 0, 1, 1),
+            bbox_to_anchor=(0, 0, 0.95, 1.05),
             bbox_transform=self.axes.transAxes,
             borderpad=0,
         )
@@ -287,5 +330,11 @@ class StaticArtist:
             orientation="vertical",
             ticks=[0, -0.2, -0.4, -0.6, -0.8, -1],
         )
-        cbar.ax.set_yticklabels(["ATH", "-20%", "-40%", "-60%", "-80%", "-100%"])
-        inset_ax.set_title("Distance from ATH", fontdict={"fontweight": "bold"}, pad=10)
+        cbar.ax.set_yticklabels(
+            ["ATH", "-20%", "-40%", "-60%", "-80%", "-100%"], color=self.theme["text"]
+        )
+        inset_ax.set_title(
+            "Distance from ATH",
+            fontdict={"fontweight": "bold", "color": self.theme["text"]},
+            pad=10,
+        )
