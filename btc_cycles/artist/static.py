@@ -16,7 +16,7 @@ THEMES = {
     "light": {
         "background": "white",
         "text": "black",
-        "grid": "lightgrey",
+        "grid": "darkgrey",
         "now_line": "darkgrey",
         "halving_line": "lightgreen",
         "ath_marker": "black",
@@ -24,7 +24,7 @@ THEMES = {
     "dark": {
         "background": "black",
         "text": "white",
-        "grid": "darkgrey",
+        "grid": "lightgrey",
         "now_line": "lightgrey",
         "halving_line": "lightgreen",
         "ath_marker": "white",
@@ -200,6 +200,10 @@ class StaticArtist:
             if v >= self.bitcoin.prices.Close.min()
         )
 
+        # set gridline color
+        self.axes.grid(color=self.theme["grid"])
+
+
         # Set r gridlines
         self.axes.set_rgrids(
             grid_intervals[start_index:],
@@ -213,7 +217,6 @@ class StaticArtist:
         self.axes.set_xticklabels(
             ProgressLabels(self.bitcoin).labels,
             fontsize=8,
-            color=self.theme["text"],
         )
 
         # r label
@@ -223,8 +226,9 @@ class StaticArtist:
         self.axes.set_ylabel("Price (USD)", rotation=0)
         self.axes.yaxis.set_label_coords(0.5, 1.01)
 
+
         # ticks params
-        self.axes.tick_params(axis="both", which="major", pad=30)
+        self.axes.tick_params(axis="both", which="major", pad=30, colors=self.theme["text"])
 
         # edge color
         [spine.set_edgecolor("lightgrey") for spine in self.axes.spines.values()]

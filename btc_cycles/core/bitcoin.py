@@ -67,8 +67,15 @@ class Bitcoin:
             theme (Union[Literal["light", "dark"],dict], optional): theme 
                 for the plot. Defaults to "light". If a dictionary is passed,
                 it should contain the following keys:
-                - "background_color" (str): background color
-                - ...
+
+                    "light": {
+                        "background": "white",
+                        "text": "black",
+                        "grid": "lightgrey",
+                        "now_line": "darkgrey",
+                        "halving_line": "lightgreen",
+                        "ath_marker": "black",
+                    },
 
         Returns:
             matplotlib.figure.Figure: figure object
