@@ -3,7 +3,7 @@
 from __future__ import annotations
 import copy
 import datetime
-from typing import Union, Literal
+from typing import Union
 from importlib.metadata import version
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,25 +11,6 @@ import matplotlib.colors as mcolors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from .utils import ColorBar, ProgressLabels
-
-THEMES = {
-    "light": {
-        "background": "white",
-        "text": "black",
-        "grid": "darkgrey",
-        "now_line": "darkgrey",
-        "halving_line": "lightgreen",
-        "ath_marker": "black",
-    },
-    "dark": {
-        "background": "black",
-        "text": "white",
-        "grid": "lightgrey",
-        "now_line": "lightgrey",
-        "halving_line": "lightgreen",
-        "ath_marker": "white",
-    },
-}
 
 
 class StaticArtist:
@@ -40,27 +21,21 @@ class StaticArtist:
     Args:
         bitcoin (Bitcoin): bitcoin object
         colorbar (ColorBar): color bar object
-        theme (Union[Literal["light", "dark"], dict], optional): theme. Defaults to "light".
+        theme (dict): a dictionary with the theme colors
 
     Attributes:
         bitcoin (Bitcoin): bitcoin object
         colorbar (ColorBar): color bar object
-        theme (Union[Literal["light", "dark"], dict]): theme
-
+        theme (dict): a dictionary with the theme colors
     """
 
-    def __init__(
-        self, bitcoin: Bitcoin, theme: Union[Literal["light", "dark"], dict] = "light"
-    ):
+    def __init__(self, bitcoin: Bitcoin, theme: dict = "light"):
         self.bitcoin = copy.copy(bitcoin)
         self.colorbar = ColorBar(self.bitcoin)
-        self._set_colors()
+        self.theme = theme
 
-        # set theme
-        if isinstance(theme, str):
-            self.theme = THEMES[theme]
-        else:
-            self.theme = theme
+        # move to a colorbar method
+        self._set_colors()
 
     def _set_colors(self):
         """set colors
@@ -203,7 +178,6 @@ class StaticArtist:
         # set gridline color
         self.axes.grid(color=self.theme["grid"])
 
-
         # Set r gridlines
         self.axes.set_rgrids(
             grid_intervals[start_index:],
@@ -226,9 +200,10 @@ class StaticArtist:
         self.axes.set_ylabel("Price (USD)", rotation=0)
         self.axes.yaxis.set_label_coords(0.5, 1.01)
 
-
         # ticks params
-        self.axes.tick_params(axis="both", which="major", pad=30, colors=self.theme["text"])
+        self.axes.tick_params(
+            axis="both", which="major", pad=30, colors=self.theme["text"]
+        )
 
         # edge color
         [spine.set_edgecolor("lightgrey") for spine in self.axes.spines.values()]

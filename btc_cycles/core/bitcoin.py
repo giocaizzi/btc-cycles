@@ -53,29 +53,28 @@ class Bitcoin:
         self,
         kind: str = "static",
         from_date: Union[str, datetime.datetime] = None,
-        theme : Union[Literal["light", "dark"],dict] = "light",
+        theme: Union[Literal["light", "dark"], dict] = "light",
         **plotting_kwargs,
     ) -> matplotlib.figure.Figure:
         """plot
 
         Args:
             kind (str, optional): plot kind. Defaults to "static".
-            from_date (Union[str, datetime.datetime], optional): start date. 
+            from_date (Union[str, datetime.datetime], optional): start date.
                 Defaults to None, which fetches all data.
-            \\*\\*plotting_kwargs: additional keyword arguments to Artist's 
+            \\*\\*plotting_kwargs: additional keyword arguments to Artist's
                 plotting method.
-            theme (Union[Literal["light", "dark"],dict], optional): theme 
+            theme (Union[Literal["light", "dark"],dict], optional): theme
                 for the plot. Defaults to "light". If a dictionary is passed,
-                it should contain the following keys:
-
-                    "light": {
-                        "background": "white",
-                        "text": "black",
-                        "grid": "lightgrey",
-                        "now_line": "darkgrey",
-                        "halving_line": "lightgreen",
-                        "ath_marker": "black",
-                    },
+                it should contain one of following keys. It's not required to
+                pass all of them, only the ones you want to change from the
+                default `light` theme:
+                - background: background color
+                - text: text color
+                - grid: grid color
+                - now_line: now line color
+                - halving_line: halving line color
+                - ath_marker: all-time high marker color
 
         Returns:
             matplotlib.figure.Figure: figure object
@@ -83,4 +82,4 @@ class Bitcoin:
         # update plotting kwargs
         plotting_kwargs.update({"from_date": from_date})
         # plot
-        return Artist(kind=kind, bitcoin=self,theme=theme).plot(**plotting_kwargs)
+        return Artist(bitcoin=self, kind=kind,  theme=theme).plot(**plotting_kwargs)
