@@ -40,7 +40,7 @@ class Bitcoin:
 
     def __init__(
         self,
-        source: str = "cryptocompare",
+        source: str = "coinmarketcap-free",
         currency: str = "USD",
         api_key: str = None,
     ):

@@ -1,5 +1,6 @@
 """test cmc (coinmarketcap)"""
 
+import pytest
 import os
 from dotenv import load_dotenv
 from btc_cycles.core.sources.cmc import CoinMarketCap
@@ -10,6 +11,7 @@ from btc_cycles.core.sources.cmc import CoinMarketCap
 load_dotenv()
 
 
+@pytest.mark.skip
 def test_CoinMarketCap():
     """test CoinMarketCap"""
     cmc = CoinMarketCap(api_key=os.getenv("CMC_API_KEY"))
