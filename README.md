@@ -2,13 +2,27 @@
 
 [![Update chart](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml/badge.svg)](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml)
 
-> ❗ The chart is updated everyday at 5 AM UTC.
+---
+
+> ❗ This chart is updated everyday at 5 AM UTC.
 
 ![Bitcoin](https://github.com/giocaizzi/btc-cycles/blob/main/bitcoin.png)
 
 ---
 
-- Bitcoin price data is fetched, as default, from [coinmarketcap](https://www.coinmarketcap.com) which returns limited amount of data points. Specify different `source` (like [coincompare](https://www.cryptocompare.com/)) with relative `api_key` to fetch the whole historical dataset from the specified source.
+## Deprecation warning
+
+> ⚠️ Since v0.3, as _CoinmarketCap v1 API has been deprecated_, **all working sources require an API key** to fetch data. The legacy *broken* source `coinmarketcap-free` is however still available, hoping for a workaround is found ([see here](https://github.com/guptarohit/cryptoCMD/issues/86)).
+
+## Usage
+
+- Bitcoin price data is fetched from a set of available sources, such as:
+
+  - [`coinmarketcap`](https://www.coinmarketcap.com), requires `api_key`.
+
+  - [`coincompare`](https://www.cryptocompare.com/), requires `api_key`.
+  - [`coinmarketcap-free`](https://www.coinmarketcap.com): free **borken legacy source**, available hoping for a workaround,  ([see here](https://github.com/guptarohit/cryptoCMD/issues/86))
+
 - Cycles are computed considering _past halving dates_ and the _expected future halving date_ fetched from [watchguru](https://watcher.guru/bitcoin-halving)
 
 ## Documentation

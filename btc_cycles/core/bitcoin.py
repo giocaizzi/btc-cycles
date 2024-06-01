@@ -22,6 +22,7 @@ class Bitcoin:
     Available data sources:
     - coinmarketcap
     - cryptocompare
+    - coinmarketcap-free (**legacy broken source**)
 
     Plot bitcoin prices and halvings data.
 
