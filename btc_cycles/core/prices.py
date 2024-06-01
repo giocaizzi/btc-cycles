@@ -1,11 +1,9 @@
 """prices module"""
 
 import pandas as pd
-import datetime as dt
-from cryptocmd import CmcScraper
-import cryptocompare
 
 from .halvings import Halvings
+from .sources import Source
 
 
 def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -53,14 +51,6 @@ class Prices:
 
     Gets historical OHLC data using desired `source`.
 
-    The source `coinmarketcap-free`, gets data from
-    CoinMarketCap, without authentication and using the `cryptocmd` package,
-    a wrapper to the API. Without authentication, the data returns a limited
-    number of data points.
-
-    The source `cryptocompare` uses the `cryptocompare` package to get data.
-    Requires an API key.
-
     Sets the following metrics on the OHLC dataframe:
     - ATH
     - distance from ATH in percentage
@@ -71,45 +61,25 @@ class Prices:
         api_key (str): API key for source
 
     Attributes:
-        source(str): source to get historical OHLC data
         coin (str): coin symbol
+        source(str): source to get historical OHLC data
+        fiat (str): currency symbol
         data (DataFrame): historical OHLC data
         halvings (DataFrame): halving data
     """
 
     def __init__(self, currency: str, source: str, api_key: str):
-        self.source = source
         self.coin = "BTC"
+        self.source = source
         self.fiat = currency
         # get price data
-        self.data = self._get_data(api_key=api_key)
+        self.data = Source(source, api_key).get_data(self.coin, self.fiat)
         # get halving data
         self.halvings = Halvings().data
         # format DataFrame
         self._fmt_df()
         # set metrics
         self._set_metrics()
-
-    def _get_data(self, api_key: str) -> pd.DataFrame:
-        """Get historical OHLC data
-
-        Returns:
-            DataFrame: OHLC data
-        """
-        if self.source == "cryptocompare":
-            cryptocompare.cryptocompare._set_api_key_parameter(api_key)
-            data = cryptocompare.get_historical_price_day_from(
-                coin=self.coin, currency=self.fiat, fromTs=dt.datetime(2009, 1, 1)
-            )
-            data = pd.DataFrame(data)
-            data["time"] = pd.to_datetime(data["time"], unit="s")
-            data.rename({"time": "Date", "close": "Close"}, axis=1, inplace=True)
-            return data[["Date", "Close"]]
-
-        else:
-            scraper = CmcScraper(self.coin, fiat=self.fiat)
-            scraper.get_data()
-            return scraper.get_dataframe()[["Date", "Close"]]
 
     def _fmt_df(self) -> None:
         """Format DataFrame"""

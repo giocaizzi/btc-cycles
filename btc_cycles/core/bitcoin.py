@@ -17,15 +17,16 @@ class Bitcoin:
     """Bitcoin
 
     Bitcoin class stores bitcoin prices and halvings data.
+    All sources require an API key.
 
     Available data sources:
-    - coinmarketcap-free
-    - cryptocompare (requires API key)
+    - coinmarketcap
+    - cryptocompare
 
     Plot bitcoin prices and halvings data.
 
     Args:
-        source (str, optional): data source. Defaults to "coinmarketcap-free".
+        source (str, optional): data source. Defaults to "cryptocompare".
         currency (str, optional): currency. Defaults to "USD".
         api_key (str, optional): API key. Defaults to None.
 
@@ -38,7 +39,7 @@ class Bitcoin:
 
     def __init__(
         self,
-        source: str = "coinmarketcap-free",
+        source: str = "cryptocompare",
         currency: str = "USD",
         api_key: str = None,
     ):
@@ -82,4 +83,4 @@ class Bitcoin:
         # update plotting kwargs
         plotting_kwargs.update({"from_date": from_date})
         # plot
-        return Artist(bitcoin=self, kind=kind,  theme=theme).plot(**plotting_kwargs)
+        return Artist(bitcoin=self, kind=kind, theme=theme).plot(**plotting_kwargs)

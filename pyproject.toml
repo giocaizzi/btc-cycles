@@ -9,11 +9,11 @@ include = ["btc_cycles/core/halvings.json"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-cryptocmd = "^0.6.4"
 matplotlib = "^3.8.3"
 numpy = "^1.26.4"
 pandas = "^2.2.1"
 cryptocompare = "^0.7.6"
+cryptocmd = "^0.6.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
@@ -22,6 +22,7 @@ black = {version = "^24.2.0", extras = ["jupyter"]}
 flake8 = "^7.0.0"
 ipykernel = "^6.29.3"
 flake8-rst-docstrings = "^0.3.0"
+python-dotenv = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core"]
