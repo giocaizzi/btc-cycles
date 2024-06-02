@@ -1,10 +1,9 @@
 [flake8]
-# black line length
-max-line-length = 88
-# E203, E701: flake8 and black compatibility
+# flake8 and black compatibility
 # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#minimal-configuration
+max-line-length = 88
 extend-ignore = E203,E701
-# exclude
+# exclude directories
 exclude =
     tests,
     .github,
@@ -13,6 +12,6 @@ exclude =
     docsrc,
     temp,
     ./build
-# plugins
+# plugins to use
 require-plugin=
     falke8-rst-docstrings
