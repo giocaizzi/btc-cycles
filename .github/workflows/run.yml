@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install .
-          pip install jupyter nbconvert
+          pip install jupyter nbconvert python-dotenv
 
       - name: Run notebook
         run: jupyter nbconvert --to notebook --execute --inplace bitcoin.ipynb
