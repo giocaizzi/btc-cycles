@@ -68,8 +68,13 @@ class Prices:
         halvings (DataFrame): halving data
     """
 
+    coin: str = "BTC"
+    source: str | None = None
+    fiat: str | None = None
+    data: pd.DataFrame | None = None
+    halvings: pd.DataFrame | None = None
+
     def __init__(self, currency: str, source: str, api_key: str):
-        self.coin = "BTC"
         self.source = source
         self.fiat = currency
         # get price data
