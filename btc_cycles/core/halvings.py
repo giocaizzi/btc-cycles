@@ -3,13 +3,17 @@
 import json
 import requests
 import datetime
+from pathlib import Path
 import pandas as pd
 
 URL = "https://api.watcher.guru/bitcoinhalving/predictions"
 
 
 def get_halving_data() -> tuple:
-    """Get halving predicted date
+    """Get next halving data
+
+    Gets the next halving data (date, blocknumber)
+    from the watcher.guru API.
 
     Returns:
         tuple: date (datetime), block (int)
@@ -24,6 +28,9 @@ def get_halving_data() -> tuple:
 
 def update_predicted_halving_date(data: pd.DataFrame) -> pd.DataFrame:
     """Update predicted halving date
+
+    Update the predicted halving date in the halving dataframe
+    by matching the block number.
 
     Args:
         data (DataFrame): halving data
@@ -42,13 +49,16 @@ def update_predicted_halving_date(data: pd.DataFrame) -> pd.DataFrame:
 class Halvings:
     """Halvings
 
+    Halvings class that contains halving cycles data.
+
     Attributes:
         data (pd.DataFrame): halving data
     """
 
     def __init__(self):
+        halvings_path = Path(__file__).resolve().parent / "halvings.json"
         # load json data into DataFrame
-        with open("btc_cycles/core/halvings.json", "r") as f:
+        with open(halvings_path, "r") as f:
             self.data = pd.DataFrame(json.load(f)).T
         # convert date to datetime
         self.data["date"] = pd.to_datetime(self.data["date"])

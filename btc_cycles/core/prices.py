@@ -1,9 +1,9 @@
 """prices module"""
 
 import pandas as pd
-from cryptocmd import CmcScraper
 
 from .halvings import Halvings
+from .sources import Source
 
 
 def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -44,28 +44,42 @@ def _find_cycle_progress(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 class Prices:
-    """Prices"""
+    """Get historical OHLC data and set metrics
 
-    def __init__(self):
+    Prices class to get historical OHLC data and halving data,
+    and process it.
+
+    Gets historical OHLC data using desired `source`.
+
+    Sets the following metrics on the OHLC dataframe:
+    - ATH
+    - distance from ATH in percentage
+    - cycle progress
+
+    Args:
+        source (str): source to get historical OHLC data
+        api_key (str): API key for source
+
+    Attributes:
+        coin (str): coin symbol
+        source(str): source to get historical OHLC data
+        fiat (str): currency symbol
+        data (DataFrame): historical OHLC data
+        halvings (DataFrame): halving data
+    """
+
+    def __init__(self, currency: str, source: str, api_key: str):
         self.coin = "BTC"
+        self.source = source
+        self.fiat = currency
         # get price data
-        self.data = self._get_data()
+        self.data = Source(source, api_key).get_data(self.coin, self.fiat)
         # get halving data
         self.halvings = Halvings().data
         # format DataFrame
         self._fmt_df()
         # set metrics
         self._set_metrics()
-
-    def _get_data(self) -> pd.DataFrame:
-        """Get historical OHLC data
-
-        Returns:
-            DataFrame: OHLC data
-        """
-        scraper = CmcScraper(self.coin)
-        scraper.get_data()
-        return scraper.get_dataframe()[["Date", "Close"]]
 
     def _fmt_df(self) -> None:
         """Format DataFrame"""

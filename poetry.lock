@@ -439,6 +439,19 @@ requests = "*"
 tablib = "*"
 
 [[package]]
+name = "cryptocompare"
+version = "0.7.6"
+description = "Wrapper for CryptoCompare.com"
+optional = false
+python-versions = ">=3"
+files = [
+    {file = "cryptocompare-0.7.6.tar.gz", hash = "sha256:0183d14152b4f156cc2da9e5a769fcdd1ac144065109441a2e1c6ab0b4573edb"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[[package]]
 name = "cycler"
 version = "0.12.1"
 description = "Composable style cycles"
@@ -1465,6 +1478,20 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-dotenv"
+version = "1.0.1"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"},
+    {file = "python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "pytz"
 version = "2024.1"
 description = "World timezone definitions, modern and historical"
@@ -1792,4 +1819,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "cf51a23a71db0fbb10e5e5b57b1c448a3cfb644f951d343d3caa75a5ff6495a1"
+content-hash = "54878479cca49ae3b31faf971faa50eb04dfa83a6ed7d802d35ee78c7875d53c"

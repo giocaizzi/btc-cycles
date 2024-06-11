@@ -45,8 +45,14 @@ class ProgressLabels:
         self._create_labels(bitcoin)
 
     def _create_labels(self, bitcoin: Bitcoin) -> None:
+        """create labels for [0, 0.25, 0.50, 0.75] percent of cycle progress"""
         self.labels = []
+        self._get_moments(bitcoin)
 
+    def _get_moments(self, bitcoin) -> None:
+        """get moments for each progress value"""
+        # for each progress value, get the corresponding dates
+        # (for each cycle_id get the first date matching the progress)
         for progress in [0.00, 0.25, 0.50, 0.75]:
             self.labels.append(
                 bitcoin.prices[
@@ -56,18 +62,23 @@ class ProgressLabels:
                 .first()
                 .reset_index()
             )
-
         self.labels = pd.concat(self.labels)
+
+        # round cycle progress to 2 decimal places
         self.labels["cycle_progress"] = self.labels["cycle_progress"].apply(
             lambda x: round(x, 2)
         )
-        # concat groupby objects as formatted strings
+        # # concat groupby objects as formatted strings
         self.labels = self.labels.groupby("cycle_progress")["Date"].apply(
             lambda x: "".join(
                 f"{label}\n" for label in x.dt.strftime("%d-%m-%Y").to_list()
             )
         )
 
+        self._add_predicted(bitcoin)
+
+    def _add_predicted(self, bitcoin) -> None:
+        """adds predicted halving date to labels"""
         self.predicted_halving_str = r"$\bf{{{} \: (predicted)}}$".format(
             bitcoin.predicted_halving_date.strftime("%d-%m-%Y")
         )
