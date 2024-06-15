@@ -97,7 +97,11 @@ class StaticArtist:
 
     def add_watermark(self) -> None:
         """add watermark to plot"""
-        date = datetime.datetime.now(datetime.UTC)
+        try:
+            # python ^3.10
+            date = datetime.datetime.now(datetime.UTC)
+        except AttributeError:
+            date = datetime.datetime.utcnow()
         date_text = date.strftime("%Y-%m-%d %H:%M UTC")
         self.axes.annotate(
             (f"{date_text}\n" f"© giocaizzi/btc-cycles : {version('btc-cycles')}"),

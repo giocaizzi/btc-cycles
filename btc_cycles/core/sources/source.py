@@ -1,5 +1,6 @@
 """Source class"""
 
+from typing import Optional
 import warnings
 import datetime as dt
 import pandas as pd
@@ -12,7 +13,7 @@ START = dt.datetime(2009, 1, 1)
 
 class Source:
 
-    def __init__(self, source: str, api_key: str | None = None):
+    def __init__(self, source: str, api_key: Optional[str] = None):
         self.source = source
         self.api_key = api_key
 
