@@ -1,5 +1,6 @@
 """prices module"""
 
+from typing import Optional
 import pandas as pd
 
 from .halvings import Halvings
@@ -69,10 +70,10 @@ class Prices:
     """
 
     coin: str = "BTC"
-    source: str | None = None
-    fiat: str | None = None
-    data: pd.DataFrame | None = None
-    halvings: pd.DataFrame | None = None
+    source: Optional[str] = None
+    fiat: Optional[str] = None
+    data: Optional[pd.DataFrame] = None
+    halvings: Optional[pd.DataFrame] = None
 
     def __init__(self, currency: str, source: str, api_key: str):
         self.source = source
