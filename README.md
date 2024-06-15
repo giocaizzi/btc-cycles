@@ -1,6 +1,9 @@
 # btc-cycles
 
 [![Update chart](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml/badge.svg)](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml)
+![PyPI - Version](https://img.shields.io/pypi/v/btc-cycles?color=blue)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/btc-cycles)
+[![Deploy](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml/badge.svg)](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml)
 
 ---
 
