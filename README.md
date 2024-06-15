@@ -14,6 +14,12 @@
 
 > ⚠️ Since v0.3, as _CoinmarketCap v1 API has been deprecated_, **all working sources require an API key** to fetch data. The legacy free *(but broken!)* source `coinmarketcap-free` is however still available, hoping for a workaround is found ([see here](https://github.com/guptarohit/cryptoCMD/issues/86)).
 
+## Install
+
+```bash
+pip install btc-cycles
+```
+
 ## Usage
 
 - **Bitcoin price** data is fetched from a set of available sources, such as:
