@@ -1,10 +1,14 @@
 """artist module"""
 
 from __future__ import annotations
+
 import warnings
-from typing import Union, Literal
+from typing import TYPE_CHECKING, Literal, Union
 
 from .static import StaticArtist
+
+if TYPE_CHECKING:
+    from ..bitcoin import Bitcoin
 
 THEMES = {
     "light": {

@@ -1,6 +1,7 @@
 """prices module"""
 
 from typing import Optional
+
 import pandas as pd
 
 from .halvings import Halvings

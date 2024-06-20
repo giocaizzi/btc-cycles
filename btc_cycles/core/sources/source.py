@@ -1,11 +1,11 @@
 """Source class"""
 
-from typing import Optional
-import warnings
 import datetime as dt
-import pandas as pd
+import warnings
+from typing import Optional
 
 import cryptocompare
+import pandas as pd
 from cryptocmd import CmcScraper
 
 START = dt.datetime(2009, 1, 1)

@@ -5,13 +5,13 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/btc-cycles)
 [![Deploy](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml/badge.svg)](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml)
 
----
+______________________________________________________________________
 
 > ❗ This chart is updated everyday at 5 AM UTC.
 
 ![Bitcoin](https://github.com/giocaizzi/btc-cycles/blob/main/bitcoin.png)
 
----
+______________________________________________________________________
 
 ## Deprecation warning
 

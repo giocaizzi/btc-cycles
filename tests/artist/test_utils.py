@@ -1,8 +1,7 @@
 """test artist utils"""
 
-import pytest
-
 import pandas as pd
+import pytest
 
 from btc_cycles import Bitcoin
 from btc_cycles.artist.utils import ColorBar, ProgressLabels

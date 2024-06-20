@@ -1,8 +1,7 @@
 """test configuration"""
 
-import pytest
 import pandas as pd
-
+import pytest
 
 # ---- Test data ----
 
