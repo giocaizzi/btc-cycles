@@ -27,6 +27,8 @@ ipykernel = "^6.29.4"
 python-dotenv = "^1.0.1"
 pytest-mock = "^3.14"
 pre-commit = { version = "^3.7.1", python = ">=3.9,<4.0.0" }
+nbconvert = "^7.16.4"
+jupyter = "^1.0.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
