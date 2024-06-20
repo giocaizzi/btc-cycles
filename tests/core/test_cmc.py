@@ -1,8 +1,10 @@
 """test cmc (coinmarketcap)"""
 
-import pytest
 import os
+
+import pytest
 from dotenv import load_dotenv
+
 from btc_cycles.core.sources.cmc import CoinMarketCap
 
 # from cryptocmd import CmcScraper

@@ -1,10 +1,12 @@
 """test artist module"""
 
-import matplotlib
-import pytest
 import datetime
-import pandas as pd
+
+import matplotlib
 import matplotlib.figure
+import pandas as pd
+import pytest
+
 from btc_cycles.core.bitcoin import Bitcoin
 
 

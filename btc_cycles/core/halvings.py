@@ -1,10 +1,11 @@
 """halving module"""
 
-import json
-import requests
 import datetime
+import json
 from pathlib import Path
+
 import pandas as pd
+import requests
 
 URL = "https://api.watcher.guru/bitcoinhalving/predictions"
 

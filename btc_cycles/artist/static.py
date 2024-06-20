@@ -1,16 +1,21 @@
 """static artist module"""
 
 from __future__ import annotations
+
 import copy
 import datetime
-from typing import Union
 from importlib.metadata import version
-import numpy as np
-import matplotlib.pyplot as plt
+from typing import TYPE_CHECKING, Union
+
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from .utils import ColorBar, ProgressLabels
+
+if TYPE_CHECKING:
+    from ..bitcoin import Bitcoin
 
 
 class StaticArtist:

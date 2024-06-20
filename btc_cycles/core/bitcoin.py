@@ -1,16 +1,19 @@
 """bitcoin module"""
 
 from __future__ import annotations
-from typing import Union, Literal
+
 import datetime
+from typing import TYPE_CHECKING, Literal, Union
 
-from .prices import Prices
-from .halvings import get_halving_data, Halvings
 from ..artist import Artist
-
+from .halvings import Halvings, get_halving_data
+from .prices import Prices
 
 # TODO: for now its assuming that the
 #  cycle length is the same as previous
+
+if TYPE_CHECKING:
+    import matplotlib.figure
 
 
 class Bitcoin:
