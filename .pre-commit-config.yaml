@@ -54,7 +54,7 @@ repos:
       - id: black-jupyter
   # blacken-docs: run black in python codeblocks
   - repo: https://github.com/adamchainz/blacken-docs
-    rev: 1.16.0
+    rev: 1.18.0
     hooks:
       - id: blacken-docs
   # ------------------------------
@@ -85,3 +85,12 @@ repos:
     rev: 0.7.17
     hooks:
       - id: mdformat
+  # ------------------------------
+  # poetry
+  # ------------------------------
+  - repo: https://github.com/python-poetry/poetry
+    rev: 1.8.0
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+      - id: poetry-install
