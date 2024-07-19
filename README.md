@@ -35,4 +35,4 @@ pip install btc-cycles
 
 ## Documentation
 
-See this [notebook](https://github.com/giocaizzi/btc-cycles/bitcoin.ipynb).
+See this [notebook](https://github.com/giocaizzi/btc-cycles/blob/main/bitcoin.ipynb).
