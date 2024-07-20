@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 from typing import TYPE_CHECKING
 
 import matplotlib.colors as mcolors
@@ -84,8 +85,14 @@ class ProgressLabels:
 
     def _add_predicted(self, bitcoin) -> None:
         """adds predicted halving date to labels"""
-        self.predicted_halving_str = r"$\bf{{{} \: (predicted)}}$".format(
-            bitcoin.predicted_halving_date.strftime("%d-%m-%Y")
-        )
-
-        self.labels.iloc[0] = self.labels.iloc[0] + self.predicted_halving_str
+        # get current cycle length
+        expected_length = bitcoin.halvings["cycle_length"].dropna().iloc[-1]
+        # list of predicted dates (0.25, 0.5 and 0.75 of the cycle)
+        predicted_dates = [bitcoin.predicted_halving_date] + [
+            bitcoin.halvings["Date"].dropna().iloc[-2] + dt.timedelta(days=x)
+            for x in [x * expected_length for x in [0.25, 0.5, 0.75]]
+        ]
+        # string and add to labels
+        for i, date in enumerate(predicted_dates):
+            predicted_string = r"$\bf{{{}}}$".format(date.strftime("%d-%m-%Y"))
+            self.labels.iloc[i] = self.labels.iloc[i] + predicted_string
