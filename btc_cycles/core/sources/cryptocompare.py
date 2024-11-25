@@ -1,9 +1,11 @@
 """CryptoCompare source"""
-
+from typing import Optional
 import cryptocompare
 import pandas as pd
+import datetime as dt
 
-from btc_cycles.core.sources.base import START, Source
+
+from btc_cycles.core.sources.base import Source
 
 
 class CryptoCompare(Source):
@@ -25,7 +27,7 @@ class CryptoCompare(Source):
         try:
             cryptocompare.cryptocompare._set_api_key_parameter(self.api_key)
             data = cryptocompare.get_historical_price_day_from(
-                coin=coin, currency=fiat, fromTs=START
+                coin=coin, currency=fiat, fromTs=self.start
             )
             data = pd.DataFrame(data)
             data["time"] = pd.to_datetime(data["time"], unit="s")

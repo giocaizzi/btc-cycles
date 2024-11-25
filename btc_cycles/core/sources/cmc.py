@@ -2,8 +2,9 @@
 
 import pandas as pd
 import requests
+import datetime as dt
 
-from btc_cycles.core.sources.base import Source
+from btc_cycles.core.sources.base import Source, START
 
 BASE_URL = "https://pro-api.coinmarketcap.com/v2"
 ENDPOINT = "/cryptocurrency/ohlcv/historical"
@@ -12,13 +13,12 @@ ENDPOINT = "/cryptocurrency/ohlcv/historical"
 class CoinMarketCap(Source):
     """CoinMarketCap v2 API Source"""
 
-    def get_data(self, symbol: str, start: str, end: str) -> dict:
+    def get_data(self, coin: str, fiat:str) -> dict:
         """Get historical OHLC data from CoinMarketCap
 
         Args:
-            symbol (str): cryptocurrency symbol
-            start (str): start date in format "YYYY-MM-DD"
-            end (str): end date in format "YYYY-MM-DD"
+            coin (str): coin symbol
+            fiat (str): currency symbol
 
         Returns:
             dict: historical OHLC data
@@ -28,9 +28,9 @@ class CoinMarketCap(Source):
             "X-CMC_PRO_API_KEY": self.api_key,
         }
         params = {
-            "symbol": symbol,
-            "time_start": start,
-            "time_end": end,
+            "symbol": coin,
+            "time_start": self.start.strftime("%Y-%m-%d"),
+            "time_end": dt.datetime.now(dt.UTC).strftime("%Y-%m-%d"),
         }
         url = f"{BASE_URL}{ENDPOINT}"
         response = requests.get(url, headers=headers, params=params)

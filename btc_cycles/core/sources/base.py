@@ -28,7 +28,7 @@ class Source(ABC):
 
     @abstractmethod
     def get_data(
-        self, coin: str, fiat: str, start: str | dt.datetime, end: str | dt.datetime
+        self, coin: str, fiat: str
     ) -> pd.DataFrame:
         """Get historical OHLC data
 
@@ -40,3 +40,8 @@ class Source(ABC):
             DataFrame: historical OHLC data
         """
         ...
+
+    @property
+    def start(self):
+        """Get start date"""
+        return START
