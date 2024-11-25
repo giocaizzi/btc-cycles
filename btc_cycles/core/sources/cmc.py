@@ -1,18 +1,18 @@
 """CoinmarketCap API wrapper."""
 
+import pandas as pd
 import requests
+
+from btc_cycles.core.sources.base import Source
 
 BASE_URL = "https://pro-api.coinmarketcap.com/v2"
 ENDPOINT = "/cryptocurrency/ohlcv/historical"
 
 
-class CoinMarketCap:
-    """CoinMarketCap v2 API wrapper"""
+class CoinMarketCap(Source):
+    """CoinMarketCap v2 API Source"""
 
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-
-    def get_historical_data(self, symbol: str, start: str, end: str) -> dict:
+    def get_data(self, symbol: str, start: str, end: str) -> dict:
         """Get historical OHLC data from CoinMarketCap
 
         Args:
@@ -34,4 +34,4 @@ class CoinMarketCap:
         }
         url = f"{BASE_URL}{ENDPOINT}"
         response = requests.get(url, headers=headers, params=params)
-        return response.json()
+        return pd.DataFrame(response.json())

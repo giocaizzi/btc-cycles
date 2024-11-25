@@ -18,7 +18,6 @@ pandas = [
     { version = "<2.1", python = "<3.9" },
 ]
 cryptocompare = "^0.7.6"
-cryptocmd = "^0.6.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"

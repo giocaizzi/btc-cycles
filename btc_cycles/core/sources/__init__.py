@@ -1,5 +1,6 @@
 """sources module"""
 
-from .source import Source
+from .cmc import CoinMarketCap
+from .cryptocompare import CryptoCompare
 
-__all__ = ["Source"]
+__all__ = ["CryptoCompare", "CoinMarketCap"]

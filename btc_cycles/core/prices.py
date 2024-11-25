@@ -5,7 +5,7 @@ from typing import Optional
 import pandas as pd
 
 from .halvings import Halvings
-from .sources import Source
+from .sources import CoinMarketCap, CryptoCompare
 
 
 def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -58,10 +58,6 @@ class Prices:
     - distance from ATH in percentage
     - cycle progress
 
-    Args:
-        source (str): source to get historical OHLC data
-        api_key (str): API key for source
-
     Attributes:
         coin (str): coin symbol
         source(str): source to get historical OHLC data
@@ -77,10 +73,27 @@ class Prices:
     halvings: Optional[pd.DataFrame] = None
 
     def __init__(self, currency: str, source: str, api_key: str):
+        """initialize Prices class
+
+        Args:
+            currency (str): currency symbol
+            source (str): source to get historical OHLC data
+            api_key (str): API key for source
+        """
+        # set attributes
         self.source = source
         self.fiat = currency
+
         # get price data
-        self.data = Source(source, api_key).get_data(self.coin, self.fiat)
+        if source == "coinmarketcap":
+            self.data = CoinMarketCap(api_key).get_data(self.coin, self.fiat)
+        elif source == "coinmarketcap-free":
+            raise NotImplementedError("Source 'coinmarketcap-free' is not implemented.")
+        elif source == "cryptocompare":
+            self.data = CryptoCompare(api_key).get_data(self.coin, self.fiat)
+        else:
+            raise ValueError(f"Source '{source}' is not valid.")
+
         # get halving data
         self.halvings = Halvings().data
         # format DataFrame
