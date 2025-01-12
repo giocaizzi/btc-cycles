@@ -93,10 +93,6 @@ class StaticArtist:
         # image creation date and copyright
         self.add_watermark()
 
-        # necessary althought the warning
-        # otherwise a savefig on the fig would cut
-        self.f.tight_layout()
-
         # return figure
         return self.f
 
@@ -283,22 +279,13 @@ class StaticArtist:
             loc="upper left",
             bbox_to_anchor=(-0.075, 1.05),
             fontsize=10,
-            # title="$\\bf{Legend}$",
+            title="$\\bf{BTCUSD\\ price\\ halving\\ cycles}$",
             title_fontsize="13",
-            # labelspacing=1.5,
             frameon=False,
         )
         # Set the color of legend text
         for text in legend.get_texts():
             text.set_color(self.theme["text"])
-
-        # title
-        title = self.axes.set_title(
-            "Bitcoin price halving cycles",
-            fontdict={"fontsize": 15, "fontweight": "bold"},
-            pad=20,
-        )
-        title.set_color(self.theme["text"])
 
     def add_colorbar(self) -> None:
         """add colorbar to plot"""
