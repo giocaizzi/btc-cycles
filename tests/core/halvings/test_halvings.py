@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from btc_cycles.core.halvings import Halvings
+from btc_cycles.coins.bitcoin.halvings import Halvings
 import datetime
 from unittest import mock
 

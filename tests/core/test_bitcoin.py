@@ -7,7 +7,7 @@ import matplotlib.figure
 import pandas as pd
 import pytest
 
-from btc_cycles.core.bitcoin import Bitcoin
+from btc_cycles.coins.bitcoin.bitcoin import Bitcoin
 
 
 @pytest.fixture

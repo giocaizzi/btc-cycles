@@ -1,4 +1,4 @@
-from btc_cycles.core.halvings import get_halving_data
+from btc_cycles.coins.bitcoin.halvings import get_halving_data
 
 
 import datetime

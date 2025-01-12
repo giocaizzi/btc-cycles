@@ -5,7 +5,7 @@ import pytest
 import datetime
 from unittest import mock
 
-from btc_cycles.core.halvings import update_predicted_halving_date
+from btc_cycles.coins.bitcoin.halvings import update_predicted_halving_date
 
 @pytest.mark.skip
 @mock.patch("btc_cycles.core.halvings.get_halving_data")
