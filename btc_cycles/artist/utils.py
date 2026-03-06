@@ -10,6 +10,8 @@ import pandas as pd
 if TYPE_CHECKING:
     from ..core.bitcoin import Bitcoin
 
+MILESTONE_NAMES = ["Halving", "25%", "50%", "75%"]
+
 
 class ColorBar:
     """Color bar for distance-from-ATH color mapping.
@@ -36,6 +38,8 @@ class ColorBar:
 
 class ProgressLabels:
     """Progress labels for the polar chart x-axis ticks.
+
+    Shows milestone name, latest cycle date, and predicted next date.
 
     Args:
         bitcoin: Bitcoin object with price and halving data.
@@ -68,13 +72,13 @@ class ProgressLabels:
         self.labels["cycle_progress"] = self.labels["cycle_progress"].apply(
             lambda x: round(x, 2)
         )
+        # keep only the last date per progress milestone
         self.labels = self.labels.groupby("cycle_progress")["Date"].apply(
-            lambda x: "".join(
-                f"{label}\n" for label in x.dt.strftime("%d-%m-%Y").to_list()
-            )
+            lambda x: x.dt.strftime("%d-%m-%Y").to_list()[-1]
         )
 
         self._add_predicted(bitcoin)
+        self._add_milestone_names()
 
     def _add_predicted(self, bitcoin: "Bitcoin") -> None:
         """Adds predicted halving date to labels."""
@@ -85,4 +89,9 @@ class ProgressLabels:
         ]
         for i, date in enumerate(predicted_dates):
             predicted_string = r"$\bf{{{}}}$".format(date.strftime("%d-%m-%Y"))
-            self.labels.iloc[i] = self.labels.iloc[i] + predicted_string
+            self.labels.iloc[i] = self.labels.iloc[i] + "\n" + predicted_string
+
+    def _add_milestone_names(self) -> None:
+        """Prepend milestone names to labels."""
+        for i, name in enumerate(MILESTONE_NAMES):
+            self.labels.iloc[i] = name + "\n" + self.labels.iloc[i]

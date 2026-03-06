@@ -17,6 +17,8 @@
 
 > This chart is updated daily at 5:00 UTC.
 
+[**Interactive chart**](https://github.com/giocaizzi/btc-cycles/blob/main/notebooks/bitcoin.html) | [Static chart](https://github.com/giocaizzi/btc-cycles/blob/main/notebooks/bitcoin.png)
+
 ![Bitcoin](https://github.com/giocaizzi/btc-cycles/blob/main/notebooks/bitcoin.png)
 
 ---
@@ -31,8 +33,13 @@ btc = Bitcoin(
     api_key="YOUR_API_KEY",
 )
 
+# static chart (matplotlib)
 fig = btc.plot(from_date="2012-11-28")
 fig.savefig("bitcoin.png")
+
+# interactive chart (plotly)
+fig = btc.plot(kind="interactive", from_date="2012-11-28")
+fig.write_html("bitcoin.html")
 ```
 
 ## Installation

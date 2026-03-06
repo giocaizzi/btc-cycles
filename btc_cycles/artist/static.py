@@ -165,11 +165,9 @@ class StaticArtist:
         )
 
         self.axes.set_rlabel_position(0)
-        self.axes.set_ylabel("Price\n(USD)", rotation=0, labelpad=15)
-        self.axes.yaxis.set_label_coords(0.5, 1.03)
 
         self.axes.tick_params(
-            axis="both", which="major", pad=30, colors=self.theme["text"]
+            axis="both", which="major", pad=35, colors=self.theme["text"]
         )
 
         for spine in self.axes.spines.values():

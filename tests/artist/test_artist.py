@@ -45,9 +45,9 @@ class TestThemeResolution:
         with pytest.raises(ValueError):
             Artist(mock_bitcoin, kind="static", theme="neon")
 
-    def test_dynamic_kind_raises(self, mock_bitcoin):
-        with pytest.raises(NotImplementedError):
-            Artist(mock_bitcoin, kind="dynamic", theme="light")
+    def test_interactive_kind_accepted(self, mock_bitcoin):
+        artist = Artist(mock_bitcoin, kind="interactive", theme="light")
+        assert artist.kind == "interactive"
 
     def test_invalid_kind_raises(self, mock_bitcoin):
         with pytest.raises(ValueError):

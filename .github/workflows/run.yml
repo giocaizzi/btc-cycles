@@ -32,7 +32,7 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet notebooks/bitcoin.png; then
+          if git diff --quiet notebooks/bitcoin.png notebooks/bitcoin.html; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"

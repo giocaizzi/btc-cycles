@@ -2,12 +2,14 @@
 
 import datetime
 import warnings
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Union
 
+from .interactive import InteractiveArtist
 from .static import StaticArtist
 
 if TYPE_CHECKING:
     import matplotlib.figure
+    import plotly.graph_objects as go
 
     from ..core.bitcoin import Bitcoin
 
@@ -40,29 +42,31 @@ class Artist:
 
     Args:
         bitcoin: Bitcoin object with price and halving data.
-        kind: Type of artist ("static" or "dynamic").
+        kind: Type of artist ("static" or "interactive").
         theme: Theme colors — a preset name or a dict of overrides.
 
     Raises:
-        NotImplementedError: If kind is "dynamic".
         ValueError: If kind or theme is invalid.
     """
 
     def __init__(
         self,
         bitcoin: "Bitcoin",
-        kind: Literal["static", "dynamic"],
+        kind: Literal["static", "interactive"],
         theme: Literal["light", "dark"] | dict[str, str],
     ):
         self.theme: dict[str, str] = self.__unwrap_theme(theme)
 
         if kind == "static":
             self._kind = kind
-            self.artist: StaticArtist = StaticArtist(bitcoin, theme=self.theme)
-        elif kind == "dynamic":
-            raise NotImplementedError
+            self.artist: StaticArtist | InteractiveArtist = StaticArtist(
+                bitcoin, theme=self.theme
+            )
+        elif kind == "interactive":
+            self._kind = kind
+            self.artist = InteractiveArtist(bitcoin, theme=self.theme)
         else:
-            raise ValueError("kind must be 'static' or 'dynamic'")
+            raise ValueError("kind must be 'static' or 'interactive'")
 
     def __unwrap_theme(
         self,
@@ -97,13 +101,13 @@ class Artist:
     def plot(
         self,
         from_date: str | datetime.datetime | None = None,
-    ) -> "matplotlib.figure.Figure":
+    ) -> Union["matplotlib.figure.Figure", "go.Figure"]:
         """Delegate to the underlying artist's plot method.
 
         Args:
             from_date: Start date for filtering displayed data.
 
         Returns:
-            The matplotlib figure.
+            A matplotlib Figure (static) or Plotly Figure (interactive).
         """
         return self.artist.plot(from_date=from_date)

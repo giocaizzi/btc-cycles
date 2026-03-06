@@ -13,6 +13,7 @@ dependencies = [
     "cryptocmd>=0.6.4",
     "requests>=2.28",
     "scipy>=1.11",
+    "plotly>=6.6.0",
 ]
 
 [dependency-groups]
@@ -26,6 +27,7 @@ dev = [
     "nbconvert>=7.16",
     "jupyter>=1.0",
     "ruff>=0.11",
+    "kaleido>=1.2.0",
 ]
 
 [tool.pytest.ini_options]

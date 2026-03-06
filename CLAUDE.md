@@ -6,7 +6,7 @@ Read more in [README.md](./README.md).
 
 # `bitcoin.ipynb`
 
-This repo has a [bitcoin.ipynb](./notebooks/bitcoin.ipynb) notebook that contains the code producing [bitcoin.png](./notebooks/bitcoin.png), the chart shown in the README.
+This repo has a [bitcoin.ipynb](./notebooks/bitcoin.ipynb) notebook that contains the code producing [bitcoin.png](./notebooks/bitcoin.png) (static matplotlib chart) and [bitcoin.html](./notebooks/bitcoin.html) (interactive plotly chart), both shown in the README.
 Keep the notebook updated.
 
 The notebook is run everyday at everyday at 5:00 UTC by the [run.yml](./.github/workflows/run.yml) GitHub Action workflow, which commits the updated notebook and chart to the repository.

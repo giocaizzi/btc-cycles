@@ -1,7 +1,7 @@
 """bitcoin module"""
 
 import datetime
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Union
 
 from ..artist import Artist
 from .halvings import Halvings, get_halving_data
@@ -9,6 +9,7 @@ from .prices import Prices
 
 if TYPE_CHECKING:
     import matplotlib.figure
+    import plotly.graph_objects as go
 
 
 class Bitcoin:
@@ -53,14 +54,14 @@ class Bitcoin:
 
     def plot(
         self,
-        kind: str = "static",
+        kind: Literal["static", "interactive"] = "static",
         from_date: str | datetime.datetime | None = None,
         theme: Literal["light", "dark"] | dict[str, str] = "light",
-    ) -> "matplotlib.figure.Figure":
+    ) -> Union["matplotlib.figure.Figure", "go.Figure"]:
         """Plot bitcoin prices against halving cycles.
 
         Args:
-            kind: Plot kind. Defaults to "static".
+            kind: Plot kind ("static" or "interactive"). Defaults to "static".
             from_date: Start date for display filtering.
             theme: Theme for the plot. Defaults to "light". If a dictionary
                 is passed, only the keys to override need to be provided.
@@ -68,6 +69,6 @@ class Bitcoin:
                 ath_marker, low_marker, watermark.
 
         Returns:
-            The matplotlib figure.
+            A matplotlib Figure (static) or Plotly Figure (interactive).
         """
         return Artist(bitcoin=self, kind=kind, theme=theme).plot(from_date=from_date)
