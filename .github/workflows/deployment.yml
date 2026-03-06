@@ -7,9 +7,41 @@ on:
     branches: [main]
 
 jobs:
-  deploy-poetry:
-    uses: giocaizzi/python-dev-actions/.github/workflows/deployment.yml@main
-    secrets: inherit
-    with:
-      python-version: "3.10"
-      python-tested-versions: "['3.8','3.9','3.10','3.11','3.12']"
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  test:
+    name: test (py${{ matrix.python-version }})
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync
+      - run: uv run pytest
+
+      - name: Upload coverage to Coveralls
+        if: matrix.python-version == '3.10'
+        uses: coverallsapp/github-action@v2
+        with:
+          allow-empty: true
+          token: ${{ secrets.COVERALLS_TOKEN }}
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.10'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

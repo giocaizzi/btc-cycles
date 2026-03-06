@@ -28,6 +28,48 @@ def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
+def _find_cycle_lows(
+    dataframe: pd.DataFrame, min_separation_days: int = 90
+) -> pd.DataFrame:
+    """Find significant drawdown lows in each completed cycle.
+
+    For each completed cycle, finds the deepest drawdown from ATH,
+    then checks for a second significant low separated by at least
+    `min_separation_days` from the first.
+
+    Excludes the last (ongoing) cycle since the true bottom is unknown.
+
+    Args:
+        dataframe (DataFrame): historical OHLC data with
+            "distance_ath_perc", "cycle_id", and "Date" columns
+        min_separation_days (int): minimum days between two lows
+            to consider them distinct. Defaults to 90.
+
+    Returns:
+        DataFrame: historical OHLC data with "is_cycle_low" column
+    """
+    dataframe["is_cycle_low"] = False
+    last_cycle = dataframe["cycle_id"].max()
+
+    for cycle_id, cycle_df in dataframe[dataframe["cycle_id"] < last_cycle].groupby(
+        "cycle_id"
+    ):
+        # first low: deepest drawdown
+        first_low_idx = cycle_df["distance_ath_perc"].idxmin()
+        dataframe.loc[first_low_idx, "is_cycle_low"] = True
+
+        # second low: deepest drawdown at least min_separation_days away
+        first_low_date = dataframe.loc[first_low_idx, "Date"]
+        distant = cycle_df[
+            (cycle_df["Date"] - first_low_date).dt.days.abs() >= min_separation_days
+        ]
+        if not distant.empty:
+            second_low_idx = distant["distance_ath_perc"].idxmin()
+            dataframe.loc[second_low_idx, "is_cycle_low"] = True
+
+    return dataframe
+
+
 def _find_cycle_progress(dataframe: pd.DataFrame) -> pd.DataFrame:
     """find cycle progress
 
@@ -115,5 +157,7 @@ class Prices:
         """set metrics to prices DataFrame"""
         # find ATH
         self.data = _find_ath(self.data)
+        # find cycle lows
+        self.data = _find_cycle_lows(self.data)
         # find cycle progress
         self.data = _find_cycle_progress(self.data)

@@ -14,20 +14,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up python
-        uses: actions/setup-python@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: |
-          pip install .
-          pip install jupyter nbconvert python-dotenv
+        run: uv sync
 
       - name: Run notebook
-        run: jupyter nbconvert --to notebook --execute --inplace bitcoin.ipynb
+        run: uv run jupyter nbconvert --to notebook --execute --inplace notebooks/bitcoin.ipynb
+        env:
+          CRYPTOCOMPARE_API_KEY: ${{ secrets.CRYPTOCOMPARE_API_KEY }}
 
       - name: Get current time
         uses: josStorer/get-current-time@v2

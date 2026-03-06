@@ -1,8 +1,5 @@
 name: Upload Python Package
 
-## https://github.com/pypa/gh-action-pypi-publish/issues/166
-## pypi trusted publishing does not support reusable actions
-
 on:
   release:
     types: [published]
@@ -14,18 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.x"
-      - name: Install pypa/build
-        run: python3 -m pip install build --user
 
-      - name: Build a binary wheel and a source tarball
-        run: python3 -m build
+      - name: Build package
+        run: uv build
 
       - name: Store the distribution packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
@@ -37,14 +32,14 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/btc-cycles # project name
+      url: https://pypi.org/p/btc-cycles
     permissions:
-      id-token: write # IMPORTANT: mandatory for trusted publishing
+      id-token: write
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
-      - name: Publish distribution 📦 to PyPI
+      - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

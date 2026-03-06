@@ -17,7 +17,6 @@ START = dt.datetime(2010, 7, 17)
 
 
 class Source:
-
     def __init__(self, source: str, api_key: Optional[str] = None):
         self.source = source
         self.api_key = api_key

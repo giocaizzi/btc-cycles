@@ -78,8 +78,8 @@ class StaticArtist:
         # # Plot ATHs
         self.add_aths()
 
-        # # # plot bottoms
-        # self.add_bottoms()
+        # plot cycle lows
+        self.add_bottoms()
 
         # format graph
         self.format_chart()
@@ -105,7 +105,7 @@ class StaticArtist:
             date = datetime.datetime.utcnow()
         date_text = date.strftime("%Y-%m-%d %H:%M UTC")
         self.axes.annotate(
-            (f"{date_text}\n" f"© giocaizzi/btc-cycles : {version('btc-cycles')}"),
+            (f"{date_text}\n© giocaizzi/btc-cycles : {version('btc-cycles')}"),
             xy=(0.5, 0.33),
             xycoords="axes fraction",
             textcoords="axes fraction",
@@ -214,13 +214,14 @@ class StaticArtist:
         [spine.set_edgecolor("lightgrey") for spine in self.axes.spines.values()]
 
     def add_bottoms(self) -> None:
-        """add bottoms to plot"""
+        """add cycle low points to plot"""
+        lows = self.bitcoin.prices[self.bitcoin.prices["is_cycle_low"]]
         self.axes.scatter(
-            self.bitcoin.prices["cycle_progress"] * 2 * np.pi,
-            self.bitcoin.prices["Close"],
-            marker="o",
-            c="r",
-            s=20,
+            lows["cycle_progress"] * 2 * np.pi,
+            lows["Close"],
+            marker="v",
+            c=self.theme["low_marker"],
+            s=40,
             zorder=10,
         )
 
@@ -275,6 +276,7 @@ class StaticArtist:
                 "Today",
                 "Halving day",
                 "All time high (ATH)",
+                "Cycle low",
             ],
             loc="upper left",
             bbox_to_anchor=(-0.075, 1.05),

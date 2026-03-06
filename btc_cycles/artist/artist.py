@@ -18,6 +18,7 @@ THEMES = {
         "now_line": "darkgrey",
         "halving_line": "lightgreen",
         "ath_marker": "black",
+        "low_marker": "red",
     },
     "dark": {
         "background": "black",
@@ -26,6 +27,7 @@ THEMES = {
         "now_line": "lightgrey",
         "halving_line": "lightgreen",
         "ath_marker": "white",
+        "low_marker": "red",
     },
 }
 

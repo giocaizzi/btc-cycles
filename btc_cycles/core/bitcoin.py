@@ -80,6 +80,7 @@ class Bitcoin:
                 - now_line: now line color
                 - halving_line: halving line color
                 - ath_marker: all-time high marker color
+                - low_marker: cycle low marker color
 
         Returns:
             matplotlib.figure.Figure: figure object
