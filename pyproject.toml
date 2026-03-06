@@ -12,6 +12,7 @@ dependencies = [
     "cryptocompare>=0.7.6",
     "cryptocmd>=0.6.4",
     "requests>=2.28",
+    "scipy>=1.11",
 ]
 
 [dependency-groups]

@@ -11,6 +11,7 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from scipy.stats import gaussian_kde
 
 from .utils import ColorBar, ProgressLabels
 
@@ -80,6 +81,9 @@ class StaticArtist:
 
         # plot cycle lows
         self.add_bottoms()
+
+        # cycle low probability band
+        self.add_low_probability_band()
 
         # format graph
         self.format_chart()
@@ -225,6 +229,55 @@ class StaticArtist:
             zorder=10,
         )
 
+    def add_low_probability_band(self, n_bins: int = 100) -> None:
+        """Add a shaded radial band showing cycle low probability density.
+
+        Uses KDE on historical cycle low progress values to estimate
+        where in the cycle the bottom is most likely to occur.
+        Draws thin radial strips with alpha proportional to the density.
+
+        Args:
+            n_bins (int): number of angular bins for the shading.
+        """
+        lows = self.bitcoin.prices[self.bitcoin.prices["is_cycle_low"]]
+        if len(lows) < 2:
+            return
+
+        progress_values = lows["cycle_progress"].values
+        kde = gaussian_kde(progress_values)
+
+        # evaluate density on a grid
+        grid = np.linspace(0, 1, n_bins + 1)
+        centers = (grid[:-1] + grid[1:]) / 2
+        density = kde(centers)
+
+        # normalize density to [0, 1] for alpha mapping
+        density_norm = density / density.max()
+
+        # radial extent: full price range
+        r_min = self.bitcoin.prices["Close"].min()
+        r_max = 1_000_000
+
+        # draw each strip
+        color = mcolors.to_rgb(self.theme["low_marker"])
+        max_alpha = 0.15
+        bin_width = (grid[1] - grid[0]) * 2 * np.pi
+
+        for i, (center, d) in enumerate(zip(centers, density_norm)):
+            if d < 0.10:
+                continue
+            theta = center * 2 * np.pi
+            self.axes.bar(
+                theta,
+                r_max - r_min,
+                width=bin_width,
+                bottom=r_min,
+                color=color,
+                alpha=d * max_alpha,
+                zorder=1,
+                edgecolor="none",
+            )
+
     def add_aths(self) -> None:
         """add all time highs to plot"""
         aths = self.bitcoin.prices[self.bitcoin.prices["distance_ath_perc"] == 0]
@@ -277,6 +330,7 @@ class StaticArtist:
                 "Halving day",
                 "All time high (ATH)",
                 "Cycle low",
+                "Cycle low probability",
             ],
             loc="upper left",
             bbox_to_anchor=(-0.075, 1.05),
