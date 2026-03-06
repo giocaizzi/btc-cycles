@@ -9,7 +9,7 @@ ______________________________________________________________________
 
 > ❗ This chart is updated everyday at 5 AM UTC.
 
-![Bitcoin](https://github.com/giocaizzi/btc-cycles/blob/main/bitcoin.png)
+![Bitcoin](https://github.com/giocaizzi/btc-cycles/blob/main/notebooks/bitcoin.png)
 
 ______________________________________________________________________
 
