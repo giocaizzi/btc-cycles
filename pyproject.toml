@@ -1,6 +1,6 @@
 [project]
 name = "btc-cycles"
-version = "0.4.0"
+version = "0.4.1"
 description = "Track Bitcoin price over halving cycles"
 authors = [{ name = "giocaizzi", email = "giocaizzi@gmail.com" }]
 license = { text = "MIT" }
