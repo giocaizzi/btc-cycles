@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Union
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from scipy.stats import gaussian_kde
 
 from .utils import ColorBar, ProgressLabels
@@ -59,7 +58,7 @@ class StaticArtist:
         Args:
             from_date (Union[str, datetime.datetime]): start date
         """
-        # Create a polar subplot
+        # Create a polar subplot with extra space on the right
         self.f, self.axes = plt.subplots(
             1, 1, subplot_kw=dict(polar=True), figsize=(10, 10)
         )
@@ -206,8 +205,8 @@ class StaticArtist:
         self.axes.set_rlabel_position(0)
 
         # y label
-        self.axes.set_ylabel("Price (USD)", rotation=0)
-        self.axes.yaxis.set_label_coords(0.5, 1.01)
+        self.axes.set_ylabel("Price\n(USD)", rotation=0, labelpad=15)
+        self.axes.yaxis.set_label_coords(0.5, 1.03)
 
         # ticks params
         self.axes.tick_params(
@@ -244,7 +243,16 @@ class StaticArtist:
             return
 
         progress_values = lows["cycle_progress"].values
-        kde = gaussian_kde(progress_values)
+
+        # exclude outliers using IQR
+        q1, q3 = np.percentile(progress_values, [25, 75])
+        iqr = q3 - q1
+        mask = (progress_values >= q1 - 1.5 * iqr) & (progress_values <= q3 + 1.5 * iqr)
+        filtered = progress_values[mask]
+        if len(filtered) < 2:
+            return
+
+        kde = gaussian_kde(filtered)
 
         # evaluate density on a grid
         grid = np.linspace(0, 1, n_bins + 1)
@@ -321,36 +329,73 @@ class StaticArtist:
         )
 
     def add_legend(self) -> None:
-        """add legend and title to plot"""
-        legend = self.axes.legend(
-            [
-                "BTC/USD",
-                "Today BTC/USD Close",
-                "Today",
-                "Halving day",
-                "All time high (ATH)",
-                "Cycle low",
-                "Cycle low probability",
-            ],
+        """add legend and title to plot using proxy artists."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        proxies = [
+            Line2D([], [], marker="o", color="grey", markersize=3, linestyle="None"),
+            Line2D(
+                [],
+                [],
+                marker="D",
+                color=self.bitcoin.prices["color"].to_numpy()[-1],
+                markersize=7,
+                linestyle="None",
+            ),
+            Line2D([], [], color=self.theme["now_line"], linestyle="--"),
+            Line2D([], [], color=self.theme["halving_line"], linewidth=3),
+            Line2D(
+                [],
+                [],
+                marker="x",
+                color=self.theme["ath_marker"],
+                markersize=7,
+                linestyle="None",
+            ),
+            Line2D(
+                [],
+                [],
+                marker="v",
+                color=self.theme["low_marker"],
+                markersize=7,
+                linestyle="None",
+            ),
+            Patch(facecolor=self.theme["low_marker"], alpha=0.15),
+        ]
+        labels = [
+            "BTC/USD",
+            "Today BTC/USD Close",
+            "Today",
+            "Halving day",
+            "All time high (ATH)",
+            "Cycle low",
+            "Cycle low probability",
+        ]
+
+        legend = self.f.legend(
+            proxies,
+            labels,
             loc="upper left",
-            bbox_to_anchor=(-0.075, 1.05),
+            bbox_to_anchor=(0.01, 0.97),
             fontsize=10,
             title="$\\bf{BTCUSD\\ price\\ halving\\ cycles}$",
             title_fontsize="13",
             frameon=False,
         )
-        # Set the color of legend text
         for text in legend.get_texts():
             text.set_color(self.theme["text"])
+        legend.get_title().set_color(self.theme["text"])
 
     def add_colorbar(self) -> None:
         """add colorbar to plot"""
+        from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
         sm = plt.cm.ScalarMappable(cmap=self.colorbar.cmap, norm=self.colorbar.norm)
         inset_ax = inset_axes(
             self.axes,
             width="2.5%",
             height="25%",
-            # loc="upper right",
             bbox_to_anchor=(0, 0, 0.95, 1.05),
             bbox_transform=self.axes.transAxes,
             borderpad=0,
@@ -362,7 +407,8 @@ class StaticArtist:
             ticks=[0, -0.2, -0.4, -0.6, -0.8, -1],
         )
         cbar.ax.set_yticklabels(
-            ["ATH", "-20%", "-40%", "-60%", "-80%", "-100%"], color=self.theme["text"]
+            ["ATH", "-20%", "-40%", "-60%", "-80%", "-100%"],
+            color=self.theme["text"],
         )
         inset_ax.set_title(
             "Distance from ATH",
