@@ -1,7 +1,5 @@
 """common utils for artists"""
 
-from __future__ import annotations
-
 import datetime as dt
 from typing import TYPE_CHECKING
 
@@ -10,25 +8,25 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 if TYPE_CHECKING:
-    from ..bitcoin import Bitcoin
+    from ..core.bitcoin import Bitcoin
 
 
 class ColorBar:
-    """color bar
+    """Color bar for distance-from-ATH color mapping.
 
     Args:
-        bitcoin (Bitcoin): bitcoin object
+        bitcoin: Bitcoin object with price data.
 
     Attributes:
-        norm (matplotlib.Normalize): normalize
-        cmap (matplotlib.Colormap): colormap
+        norm: Matplotlib normalizer.
+        cmap: Matplotlib colormap.
     """
 
-    def __init__(self, bitcoin: Bitcoin):
+    def __init__(self, bitcoin: "Bitcoin"):
         self._set_cmap(bitcoin)
 
-    def _set_cmap(self, bitcoin: Bitcoin) -> None:
-        """set colors"""
+    def _set_cmap(self, bitcoin: "Bitcoin") -> None:
+        """Set colormap and normalization from price data."""
         self.norm = mcolors.Normalize(
             vmin=bitcoin.prices["distance_ath_perc"].min(),
             vmax=bitcoin.prices["distance_ath_perc"].max(),
@@ -37,28 +35,25 @@ class ColorBar:
 
 
 class ProgressLabels:
-    """progress labels
+    """Progress labels for the polar chart x-axis ticks.
 
     Args:
-        bitcoin (Bitcoin): bitcoin object
+        bitcoin: Bitcoin object with price and halving data.
 
     Attributes:
-        labels (Series): labels
-        predicted_halving_str (str): predicted halving string
+        labels: Formatted date labels for [0, 0.25, 0.50, 0.75] progress.
     """
 
-    def __init__(self, bitcoin: Bitcoin):
+    def __init__(self, bitcoin: "Bitcoin"):
         self._create_labels(bitcoin)
 
-    def _create_labels(self, bitcoin: Bitcoin) -> None:
-        """create labels for [0, 0.25, 0.50, 0.75] percent of cycle progress"""
-        self.labels = []
+    def _create_labels(self, bitcoin: "Bitcoin") -> None:
+        """Create labels for [0, 0.25, 0.50, 0.75] percent of cycle progress."""
+        self.labels: list[pd.DataFrame] = []
         self._get_moments(bitcoin)
 
-    def _get_moments(self, bitcoin) -> None:
-        """get moments for each progress value"""
-        # for each progress value, get the corresponding dates
-        # (for each cycle_id get the first date matching the progress)
+    def _get_moments(self, bitcoin: "Bitcoin") -> None:
+        """Get moments for each progress value."""
         for progress in [0.00, 0.25, 0.50, 0.75]:
             self.labels.append(
                 bitcoin.prices[
@@ -70,11 +65,9 @@ class ProgressLabels:
             )
         self.labels = pd.concat(self.labels)
 
-        # round cycle progress to 2 decimal places
         self.labels["cycle_progress"] = self.labels["cycle_progress"].apply(
             lambda x: round(x, 2)
         )
-        # # concat groupby objects as formatted strings
         self.labels = self.labels.groupby("cycle_progress")["Date"].apply(
             lambda x: "".join(
                 f"{label}\n" for label in x.dt.strftime("%d-%m-%Y").to_list()
@@ -83,16 +76,13 @@ class ProgressLabels:
 
         self._add_predicted(bitcoin)
 
-    def _add_predicted(self, bitcoin) -> None:
-        """adds predicted halving date to labels"""
-        # get current cycle length
+    def _add_predicted(self, bitcoin: "Bitcoin") -> None:
+        """Adds predicted halving date to labels."""
         expected_length = bitcoin.halvings["cycle_length"].dropna().iloc[-1]
-        # list of predicted dates (0.25, 0.5 and 0.75 of the cycle)
         predicted_dates = [bitcoin.predicted_halving_date] + [
             bitcoin.halvings["Date"].dropna().iloc[-2] + dt.timedelta(days=x)
             for x in [x * expected_length for x in [0.25, 0.5, 0.75]]
         ]
-        # string and add to labels
         for i, date in enumerate(predicted_dates):
             predicted_string = r"$\bf{{{}}}$".format(date.strftime("%d-%m-%Y"))
             self.labels.iloc[i] = self.labels.iloc[i] + predicted_string

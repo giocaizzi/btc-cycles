@@ -1,91 +1,73 @@
 """bitcoin module"""
 
-from __future__ import annotations
-
 import datetime
-from typing import TYPE_CHECKING, Literal, Union
+from typing import TYPE_CHECKING, Literal
 
 from ..artist import Artist
 from .halvings import Halvings, get_halving_data
 from .prices import Prices
-
-# TODO: for now its assuming that the
-#  cycle length is the same as previous
 
 if TYPE_CHECKING:
     import matplotlib.figure
 
 
 class Bitcoin:
-    """Bitcoin
+    """Bitcoin price data and halving cycle analysis.
 
-    Bitcoin class stores bitcoin prices and halvings data.
-    All sources require an API key.
-
-    Available data sources:
-    - coinmarketcap
-    - cryptocompare
-    - coinmarketcap-free (**legacy broken source**)
-
-    Plot bitcoin prices and halvings data.
+    Fetches price data from the selected source, merges with halving
+    cycle data, and computes metrics (ATH, cycle progress, cycle lows).
 
     Args:
-        source (str, optional): data source. Defaults to "cryptocompare".
-        currency (str, optional): currency. Defaults to "USD".
-        api_key (str, optional): API key. Defaults to None.
+        source: Data source. Defaults to "cryptocompare".
+        currency: Currency. Defaults to "USD".
+        api_key: API key for the data source.
 
     Attributes:
-        prices (DataFrame): bitcoin prices
-        halvings (DataFrame): bitcoin halvings
-        predicted_halving_date (datetime): predicted halving date
-        predicted_halving_block (int): predicted halving block
+        prices: Bitcoin prices with cycle metrics.
+        halvings: Bitcoin halving dates and cycle info.
+        predicted_halving_date: Predicted next halving date.
+        predicted_halving_block: Predicted next halving block number.
     """
 
     def __init__(
         self,
-        source: str = "coinmarketcap-free",
+        source: str = "cryptocompare",
         currency: str = "USD",
-        api_key: str = None,
+        api_key: str | None = None,
     ):
+        # single API call for halving prediction
+        prediction = get_halving_data()
+        self.predicted_halving_date, self.predicted_halving_block = prediction
+
+        # single Halvings instantiation, reused for prices
+        halvings = Halvings(prediction=prediction)
+        self.halvings = halvings.data
+
         # get processed price data
-        self.prices = Prices(currency=currency, source=source, api_key=api_key).data
-        # save halving data
-        self.halvings = Halvings().data
-        # predicted next halving date and block
-        self.predicted_halving_date, self.predicted_halving_block = get_halving_data()
+        self.prices = Prices(
+            currency=currency,
+            source=source,
+            api_key=api_key,
+            halvings=halvings.data,
+        ).data
 
     def plot(
         self,
         kind: str = "static",
-        from_date: Union[str, datetime.datetime] = None,
-        theme: Union[Literal["light", "dark"], dict] = "light",
-        **plotting_kwargs,
-    ) -> matplotlib.figure.Figure:
-        """plot
+        from_date: str | datetime.datetime | None = None,
+        theme: Literal["light", "dark"] | dict[str, str] = "light",
+    ) -> "matplotlib.figure.Figure":
+        """Plot bitcoin prices against halving cycles.
 
         Args:
-            kind (str, optional): plot kind. Defaults to "static".
-            from_date (Union[str, datetime.datetime], optional): start date.
-                Defaults to None, which fetches all data.
-            \\*\\*plotting_kwargs: additional keyword arguments to Artist's
-                plotting method.
-            theme (Union[Literal["light", "dark"],dict], optional): theme
-                for the plot. Defaults to "light". If a dictionary is passed,
-                it should contain one of following keys. It's not required to
-                pass all of them, only the ones you want to change from the
-                default `light` theme:
-                - background: background color
-                - text: text color
-                - grid: grid color
-                - now_line: now line color
-                - halving_line: halving line color
-                - ath_marker: all-time high marker color
-                - low_marker: cycle low marker color
+            kind: Plot kind. Defaults to "static".
+            from_date: Start date for display filtering.
+            theme: Theme for the plot. Defaults to "light". If a dictionary
+                is passed, only the keys to override need to be provided.
+                Valid keys: background, text, grid, now_line, halving_line,
+                ath_marker, low_marker, watermark.
 
         Returns:
-            matplotlib.figure.Figure: figure object
+            The matplotlib figure.
         """
-        # update plotting kwargs
-        plotting_kwargs.update({"from_date": from_date})
-        # plot
-        return Artist(bitcoin=self, kind=kind, theme=theme).plot(**plotting_kwargs)
+        return Artist(bitcoin=self, kind=kind, theme=theme).plot(from_date=from_date)

@@ -1,11 +1,9 @@
 """static artist module"""
 
-from __future__ import annotations
-
 import copy
 import datetime
 from importlib.metadata import version
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -15,94 +13,69 @@ from scipy.stats import gaussian_kde
 from .utils import ColorBar, ProgressLabels
 
 if TYPE_CHECKING:
-    from ..bitcoin import Bitcoin
+    from ..core.bitcoin import Bitcoin
+
+# chart constants
+PRICE_UPPER_BOUND = 1_000_000
+KDE_MAX_ALPHA = 0.15
+KDE_DENSITY_THRESHOLD = 0.10
 
 
 class StaticArtist:
-    """static artist
-
-    Using `matpotlib` to plot statically.
+    """Static polar chart artist using matplotlib.
 
     Args:
-        bitcoin (Bitcoin): bitcoin object
-        colorbar (ColorBar): color bar object
-        theme (dict): a dictionary with the theme colors
-
-    Attributes:
-        bitcoin (Bitcoin): bitcoin object
-        colorbar (ColorBar): color bar object
-        theme (dict): a dictionary with the theme colors
+        bitcoin: Bitcoin object with price and halving data.
+        theme: Theme color dictionary.
     """
 
-    def __init__(self, bitcoin: Bitcoin, theme: dict = "light"):
-        self.bitcoin = copy.copy(bitcoin)
+    def __init__(self, bitcoin: "Bitcoin", theme: dict[str, str]):
+        self.bitcoin = copy.deepcopy(bitcoin)
         self.colorbar = ColorBar(self.bitcoin)
         self.theme = theme
 
-        # move to a colorbar method
         self._set_colors()
 
-    def _set_colors(self):
-        """set colors
-
-        Create a new column in the DataFrame with the color
-        """
-        # TODO: this is a colorbar method
+    def _set_colors(self) -> None:
+        """Create a color column based on distance from ATH."""
         self.bitcoin.prices["color"] = self.bitcoin.prices["distance_ath_perc"].apply(
             lambda x: mcolors.to_hex(self.colorbar.cmap(self.colorbar.norm(x)))
         )
 
-    def plot(self, from_date: Union[str, datetime.datetime]):
-        """plot
+    def plot(
+        self,
+        from_date: str | datetime.datetime | None,
+    ) -> plt.Figure:
+        """Render the polar chart.
 
         Args:
-            from_date (Union[str, datetime.datetime]): start date
+            from_date: Start date for filtering displayed data.
+
+        Returns:
+            The matplotlib figure.
         """
-        # Create a polar subplot with extra space on the right
         self.f, self.axes = plt.subplots(
             1, 1, subplot_kw=dict(polar=True), figsize=(10, 10)
         )
-        # Set background color
         self.f.set_facecolor(self.theme["background"])
         self.axes.set_facecolor(self.theme["background"])
 
-        # Plot data
         self.add_data(from_date=from_date)
-
-        # now point
         self.add_now()
-
-        # halving
         self.add_halving()
-
-        # # Plot ATHs
         self.add_aths()
-
-        # plot cycle lows
         self.add_bottoms()
-
-        # cycle low probability band
         self.add_low_probability_band()
-
-        # format graph
         self.format_chart()
-
-        # legend
         self.add_legend()
-
-        # colorbar
         self.add_colorbar()
-
-        # image creation date and copyright
         self.add_watermark()
 
-        # return figure
         return self.f
 
     def add_watermark(self) -> None:
-        """add watermark to plot"""
+        """Add creation date and copyright watermark."""
         try:
-            # python ^3.10
             date = datetime.datetime.now(datetime.UTC)
         except AttributeError:
             date = datetime.datetime.utcnow()
@@ -115,17 +88,14 @@ class StaticArtist:
             fontsize=8,
             ha="center",
             va="center",
-            color="darkgrey",
+            color=self.theme["watermark"],
         )
 
-    def add_data(self, from_date: Union[str, datetime.datetime]) -> None:
-        """add data to plot
-
-        Filters data only for the scatter plot display, keeping full data
-        on self.bitcoin.prices for ATH markers, bottoms, and other overlays.
+    def add_data(self, from_date: str | datetime.datetime | None) -> None:
+        """Plot scatter data, filtering by from_date for display only.
 
         Args:
-            from_date (Union[str, datetime.datetime]): start date
+            from_date: Start date for filtering.
         """
         if from_date is not None:
             self.display_data = self.bitcoin.prices[
@@ -134,7 +104,6 @@ class StaticArtist:
         else:
             self.display_data = self.bitcoin.prices
 
-        # plot data
         self.axes.scatter(
             self.display_data["cycle_progress"] * 2 * np.pi,
             self.display_data["Close"].to_numpy(),
@@ -144,11 +113,8 @@ class StaticArtist:
         )
 
     def format_chart(self) -> None:
-        """format axes"""
-        # Set y-axis to logarithmic scale
+        """Format axes, gridlines, and tick labels."""
         self.axes.set_rscale("log")
-
-        # Set direction (1 for clockwise, -1 for counterclockwise)
         self.axes.set_theta_direction(-1)
         self.axes.set_theta_offset(np.pi / 2.0)
 
@@ -162,7 +128,7 @@ class StaticArtist:
             1000,
             10000,
             100000,
-            1000000,
+            PRICE_UPPER_BOUND,
         ]
 
         labels = [
@@ -184,16 +150,12 @@ class StaticArtist:
             if v >= self.display_data.Close.min()
         )
 
-        # set gridline color
         self.axes.grid(color=self.theme["grid"])
-
-        # Set r gridlines
         self.axes.set_rgrids(
             grid_intervals[start_index:],
             labels=labels[start_index:],
         )
 
-        # Set xticks and labels
         self.axes.set_xticks(
             np.linspace(0, 2 * np.pi, 4, endpoint=False),
         )
@@ -202,23 +164,19 @@ class StaticArtist:
             fontsize=8,
         )
 
-        # r label
         self.axes.set_rlabel_position(0)
-
-        # y label
         self.axes.set_ylabel("Price\n(USD)", rotation=0, labelpad=15)
         self.axes.yaxis.set_label_coords(0.5, 1.03)
 
-        # ticks params
         self.axes.tick_params(
             axis="both", which="major", pad=30, colors=self.theme["text"]
         )
 
-        # edge color
-        [spine.set_edgecolor("lightgrey") for spine in self.axes.spines.values()]
+        for spine in self.axes.spines.values():
+            spine.set_edgecolor("lightgrey")
 
     def add_bottoms(self) -> None:
-        """add cycle low points to plot"""
+        """Add cycle low markers to plot."""
         lows = self.display_data[self.display_data["is_cycle_low"]]
         self.axes.scatter(
             lows["cycle_progress"] * 2 * np.pi,
@@ -230,14 +188,13 @@ class StaticArtist:
         )
 
     def add_low_probability_band(self, n_bins: int = 100) -> None:
-        """Add a shaded radial band showing cycle low probability density.
+        """Add shaded radial band showing cycle low probability density.
 
         Uses KDE on historical cycle low progress values to estimate
         where in the cycle the bottom is most likely to occur.
-        Draws thin radial strips with alpha proportional to the density.
 
         Args:
-            n_bins (int): number of angular bins for the shading.
+            n_bins: Number of angular bins for the shading.
         """
         lows = self.bitcoin.prices[self.bitcoin.prices["is_cycle_low"]]
         if len(lows) < 2:
@@ -255,25 +212,19 @@ class StaticArtist:
 
         kde = gaussian_kde(filtered)
 
-        # evaluate density on a grid
         grid = np.linspace(0, 1, n_bins + 1)
         centers = (grid[:-1] + grid[1:]) / 2
         density = kde(centers)
-
-        # normalize density to [0, 1] for alpha mapping
         density_norm = density / density.max()
 
-        # radial extent: displayed price range
         r_min = self.display_data["Close"].min()
-        r_max = 1_000_000
+        r_max = PRICE_UPPER_BOUND
 
-        # draw each strip
         color = mcolors.to_rgb(self.theme["low_marker"])
-        max_alpha = 0.15
         bin_width = (grid[1] - grid[0]) * 2 * np.pi
 
-        for i, (center, d) in enumerate(zip(centers, density_norm)):
-            if d < 0.10:
+        for center, d in zip(centers, density_norm):
+            if d < KDE_DENSITY_THRESHOLD:
                 continue
             theta = center * 2 * np.pi
             self.axes.bar(
@@ -282,13 +233,13 @@ class StaticArtist:
                 width=bin_width,
                 bottom=r_min,
                 color=color,
-                alpha=d * max_alpha,
+                alpha=d * KDE_MAX_ALPHA,
                 zorder=1,
                 edgecolor="none",
             )
 
     def add_aths(self) -> None:
-        """add all time highs to plot"""
+        """Add all-time high markers to plot."""
         aths = self.display_data[self.display_data["distance_ath_perc"] == 0]
         self.axes.scatter(
             aths["cycle_progress"] * 2 * np.pi,
@@ -300,17 +251,18 @@ class StaticArtist:
         )
 
     def add_halving(self) -> None:
-        """add halving to plot"""
+        """Add halving day vertical line."""
         self.axes.vlines(
             0,
             self.display_data["Close"].min(),
-            1000000,
+            PRICE_UPPER_BOUND,
             color=self.theme["halving_line"],
             linewidth=3,
             zorder=0,
         )
 
     def add_now(self) -> None:
+        """Add current price marker and vertical line."""
         self.axes.scatter(
             self.display_data["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
             self.display_data["Close"].to_numpy()[-1],
@@ -319,7 +271,6 @@ class StaticArtist:
             s=50,
             zorder=8,
         )
-        # now line
         self.axes.vlines(
             self.display_data["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
             self.display_data["Close"].min(),
@@ -330,7 +281,7 @@ class StaticArtist:
         )
 
     def add_legend(self) -> None:
-        """add legend and title to plot using proxy artists."""
+        """Add legend and title using proxy artists."""
         from matplotlib.lines import Line2D
         from matplotlib.patches import Patch
 
@@ -362,7 +313,7 @@ class StaticArtist:
                 markersize=7,
                 linestyle="None",
             ),
-            Patch(facecolor=self.theme["low_marker"], alpha=0.15),
+            Patch(facecolor=self.theme["low_marker"], alpha=KDE_MAX_ALPHA),
         ]
         labels = [
             "BTC/USD",
@@ -389,7 +340,7 @@ class StaticArtist:
         legend.get_title().set_color(self.theme["text"])
 
     def add_colorbar(self) -> None:
-        """add colorbar to plot"""
+        """Add distance-from-ATH colorbar."""
         from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
         sm = plt.cm.ScalarMappable(cmap=self.colorbar.cmap, norm=self.colorbar.norm)

@@ -1,27 +1,20 @@
 """prices module"""
 
-from typing import Optional
-
 import pandas as pd
 
-from .halvings import Halvings
 from .sources import Source
 
 
 def _find_ath(dataframe: pd.DataFrame) -> pd.DataFrame:
-    """find all-time high
+    """Find all-time high and distance from ATH.
 
     Args:
-        dataframe (DataFrame): historical OHLC data with
-            "Close" column
+        dataframe: Historical OHLC data with "Close" column.
 
     Returns:
-        DataFrame: historical OHLC data with
-            "ATH" and "distance_ath_perc" columns
+        Data with "ATH" and "distance_ath_perc" columns added.
     """
-    # find ATH
     dataframe["ATH"] = dataframe["Close"].cummax()
-    # find distance from ATH in percentage
     dataframe["distance_ath_perc"] = (
         dataframe["Close"] - dataframe["ATH"]
     ) / dataframe["ATH"]
@@ -40,18 +33,18 @@ def _find_cycle_lows(
     Excludes the last (ongoing) cycle since the true bottom is unknown.
 
     Args:
-        dataframe (DataFrame): historical OHLC data with
-            "distance_ath_perc", "cycle_id", and "Date" columns
-        min_separation_days (int): minimum days between two lows
-            to consider them distinct. Defaults to 90.
+        dataframe: Historical OHLC data with
+            "distance_ath_perc", "cycle_id", and "Date" columns.
+        min_separation_days: Minimum days between two lows
+            to consider them distinct.
 
     Returns:
-        DataFrame: historical OHLC data with "is_cycle_low" column
+        Data with "is_cycle_low" column added.
     """
     dataframe["is_cycle_low"] = False
     last_cycle = dataframe["cycle_id"].max()
 
-    for cycle_id, cycle_df in dataframe[dataframe["cycle_id"] < last_cycle].groupby(
+    for _, cycle_df in dataframe[dataframe["cycle_id"] < last_cycle].groupby(
         "cycle_id"
     ):
         # first low: deepest drawdown
@@ -71,15 +64,14 @@ def _find_cycle_lows(
 
 
 def _find_cycle_progress(dataframe: pd.DataFrame) -> pd.DataFrame:
-    """find cycle progress
+    """Find cycle progress as fraction of cycle length.
 
     Args:
-        dataframe (DataFrame): historical OHLC data with
-            "cycle" and "cycle_length" columns
+        dataframe: Historical OHLC data with
+            "cycle" and "cycle_length" columns.
 
     Returns:
-        DataFrame: historical OHLC data with
-            "cycle_progress" column
+        Data with "cycle_progress" column added.
     """
     dataframe["cycle_progress"] = (
         (dataframe["Date"] - dataframe["Halving"]).dt.days
@@ -88,76 +80,58 @@ def _find_cycle_progress(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 class Prices:
-    """Get historical OHLC data and set metrics
+    """Get historical OHLC data and set metrics.
 
-    Prices class to get historical OHLC data and halving data,
-    and process it.
-
-    Gets historical OHLC data using desired `source`.
-
-    Sets the following metrics on the OHLC dataframe:
-    - ATH
-    - distance from ATH in percentage
-    - cycle progress
+    Fetches price data from the source, merges with halvings,
+    and computes ATH, cycle lows, and cycle progress.
 
     Args:
-        source (str): source to get historical OHLC data
-        api_key (str): API key for source
+        currency: Currency symbol (e.g. "USD").
+        source: Data source name.
+        api_key: API key for the source.
+        halvings: Pre-built halving data to avoid redundant API calls.
 
     Attributes:
-        coin (str): coin symbol
-        source(str): source to get historical OHLC data
-        fiat (str): currency symbol
-        data (DataFrame): historical OHLC data
-        halvings (DataFrame): halving data
+        data: Processed historical OHLC data with metrics.
     """
 
     coin: str = "BTC"
-    source: Optional[str] = None
-    fiat: Optional[str] = None
-    data: Optional[pd.DataFrame] = None
-    halvings: Optional[pd.DataFrame] = None
 
-    def __init__(self, currency: str, source: str, api_key: str):
-        self.source = source
-        self.fiat = currency
-        # get price data
-        self.data = Source(source, api_key).get_data(self.coin, self.fiat)
-        # get halving data
-        self.halvings = Halvings().data
-        # format DataFrame
+    def __init__(
+        self,
+        currency: str,
+        source: str,
+        api_key: str | None,
+        halvings: pd.DataFrame,
+    ):
+        self.data = Source(source, api_key).get_data(self.coin, currency)
+        self.halvings = halvings
         self._fmt_df()
-        # set metrics
         self._set_metrics()
 
     def _fmt_df(self) -> None:
-        """Format DataFrame"""
-        # make Date UTC aware
+        """Format DataFrame by merging with halvings and forward-filling."""
         self.data["Date"] = pd.to_datetime(self.data["Date"]).dt.tz_localize("UTC")
-        # add column to merged df so to keep track of halving dates
+
         halvings = self.halvings.copy()
         halvings["Halving"] = halvings["Date"]
         self.data = self.data.merge(
             halvings,
-            how="outer",  # keep all halving dates
+            how="outer",
             on="Date",
         )
-        # # fill NaNs due to merge only on subset of columns
         self.data[["block", "cycle_length", "cycle_id", "Halving", "reward"]] = (
             self.data[["block", "cycle_length", "cycle_id", "Halving", "reward"]]
             .infer_objects()
             .ffill()
         )
-        # remove Halvings outside of prices datarange
+        # remove halvings outside of price data range
         self.data = self.data[self.data["Close"].notna()]
         # sort by date (ATH calculation requires ascending order)
         self.data = self.data.sort_values("Date").reset_index(drop=True)
 
     def _set_metrics(self) -> None:
-        """set metrics to prices DataFrame"""
-        # find ATH
+        """Set ATH, cycle lows, and cycle progress metrics."""
         self.data = _find_ath(self.data)
-        # find cycle lows
         self.data = _find_cycle_lows(self.data)
-        # find cycle progress
         self.data = _find_cycle_progress(self.data)

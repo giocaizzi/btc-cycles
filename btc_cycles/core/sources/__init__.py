@@ -1,5 +1,5 @@
 """sources module"""
 
-from .source import Source
+from .source import DataSourceError, Source
 
-__all__ = ["Source"]
+__all__ = ["DataSourceError", "Source"]

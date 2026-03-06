@@ -1,38 +1,58 @@
+<div align="center">
+
 # btc-cycles
 
+**Bitcoin price analysis across halving cycles.**
+
+[![PyPI](https://img.shields.io/pypi/v/btc-cycles?color=blue)](https://pypi.org/project/btc-cycles/)
+[![Python](https://img.shields.io/pypi/pyversions/btc-cycles)](https://pypi.org/project/btc-cycles/)
+[![Tests](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml/badge.svg?branch=main)](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml)
 [![Update chart](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml/badge.svg)](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml)
-![PyPI - Version](https://img.shields.io/pypi/v/btc-cycles?color=blue)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/btc-cycles)
-[![Deploy](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml/badge.svg)](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-______________________________________________________________________
+</div>
 
-> ❗ This chart is updated everyday at 5 AM UTC.
+---
+
+> This chart is updated daily at 5:00 UTC.
 
 ![Bitcoin](https://github.com/giocaizzi/btc-cycles/blob/main/notebooks/bitcoin.png)
 
-______________________________________________________________________
+---
 
-## Deprecation warning
+Fetch Bitcoin price data, enrich it with halving cycle metrics (ATH, cycle progress, cycle lows), and render a polar chart. Cycles are computed using past halving dates and the predicted next halving from [watcher.guru](https://watcher.guru/bitcoin-halving).
 
-> ⚠️ Since v0.3, as _CoinmarketCap v1 API has been deprecated_, **all working sources require an API key** to fetch data. The legacy free *(but broken!)* source `coinmarketcap-free` is however still available, hoping for a workaround is found ([see here](https://github.com/guptarohit/cryptoCMD/issues/86)).
+```python
+from btc_cycles import Bitcoin
 
-## Install
+btc = Bitcoin(
+    source="cryptocompare",
+    api_key="YOUR_API_KEY",
+)
+
+fig = btc.plot(from_date="2012-11-28")
+fig.savefig("bitcoin.png")
+```
+
+## Installation
 
 ```bash
 pip install btc-cycles
 ```
 
-## Usage
+## Data Sources
 
-- **Bitcoin price** data is fetched from a set of available sources, such as:
-
-  - [`coinmarketcap`](https://www.coinmarketcap.com), requires **paid** `api_key`.
-  - [`coincompare`](https://www.cryptocompare.com/), requires **free-tier** `api_key`.
-  - [`coinmarketcap-free`](https://www.coinmarketcap.com): free *(but broken!)* legacy source, available hoping for a workaround,  ([see here](https://github.com/guptarohit/cryptoCMD/issues/86))
-
-- **Cycles** are computed considering _past halving dates_ and the _expected future halving date_ fetched from [watchguru](https://watcher.guru/bitcoin-halving)
+| Source | API Key | Status |
+|--------|---------|--------|
+| [`cryptocompare`](https://www.cryptocompare.com/) | Free tier | **Default** |
+| [`coinmarketcap`](https://www.coinmarketcap.com) | Paid | Not implemented |
+| `coinmarketcap-free` | None | Broken ([ref](https://github.com/guptarohit/cryptoCMD/issues/86)) |
 
 ## Documentation
 
-See this [notebook](https://github.com/giocaizzi/btc-cycles/blob/main/bitcoin.ipynb).
+See the [notebook](https://github.com/giocaizzi/btc-cycles/blob/main/notebooks/bitcoin.ipynb) for a full working example.
+
+## License
+
+[MIT](LICENSE)
