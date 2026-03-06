@@ -8,70 +8,84 @@ import pandas as pd
 import requests
 
 URL = "https://api.watcher.guru/bitcoinhalving/predictions"
+REQUEST_TIMEOUT = 10
 
 
-def get_halving_data() -> tuple:
-    """Get next halving data
+class HalvingAPIError(Exception):
+    """Raised when the halving prediction API is unreachable or returns invalid data."""
 
-    Gets the next halving data (date, blocknumber)
-    from the watcher.guru API.
+
+def get_halving_data() -> tuple[datetime.datetime, int]:
+    """Get next halving data from the watcher.guru API.
 
     Returns:
-        tuple: date (datetime), block (int)
+        Predicted halving date and block number.
+
+    Raises:
+        HalvingAPIError: If the API request fails or returns unexpected data.
     """
-    response = requests.get(URL).json()
-    date = datetime.datetime.fromtimestamp(response["target"]["predicted_timestamp"])
-    # localize utc
-    date = date.replace(tzinfo=datetime.timezone.utc)
-    block = int(response["target"]["block_number"])
+    try:
+        response = requests.get(URL, timeout=REQUEST_TIMEOUT).json()
+    except (requests.RequestException, ValueError) as e:
+        raise HalvingAPIError(f"Failed to fetch halving data: {e}") from e
+
+    try:
+        date = datetime.datetime.fromtimestamp(
+            response["target"]["predicted_timestamp"]
+        )
+        date = date.replace(tzinfo=datetime.timezone.utc)
+        block = int(response["target"]["block_number"])
+    except (KeyError, TypeError, ValueError) as e:
+        raise HalvingAPIError(f"Unexpected API response format: {e}") from e
+
     return date, block
 
 
-def update_predicted_halving_date(data: pd.DataFrame) -> pd.DataFrame:
-    """Update predicted halving date
-
-    Update the predicted halving date in the halving dataframe
-    by matching the block number.
+def _update_predicted_halving_date(
+    data: pd.DataFrame,
+    prediction: tuple[datetime.datetime, int],
+) -> pd.DataFrame:
+    """Update the predicted halving date in the halving dataframe.
 
     Args:
-        data (DataFrame): halving data
+        data: Halving data.
+        prediction: Predicted halving date and block number.
 
     Returns:
-        DataFrame: updated halving data
+        Updated halving data.
     """
-    # TODO: what happends if response is not
-    # updated in time? (like in 2024)
-    date, block = get_halving_data()
-    # update predicted halving date
+    date, block = prediction
     data.loc[data["block"] == block, "Date"] = date
     return data
 
 
 class Halvings:
-    """Halvings
+    """Halving cycles data loaded from JSON with predicted next halving date.
 
-    Halvings class that contains halving cycles data.
+    Args:
+        prediction: Pre-fetched halving prediction to avoid redundant API calls.
+            If None, fetches from the API.
 
     Attributes:
-        data (pd.DataFrame): halving data
+        data: Halving data.
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        prediction: tuple[datetime.datetime, int] | None = None,
+    ):
         halvings_path = Path(__file__).resolve().parent / "halvings.json"
-        # load json data into DataFrame
-        with open(halvings_path, "r") as f:
+        with open(halvings_path) as f:
             self.data = pd.DataFrame(json.load(f)).T
-        # convert date to datetime
+
         self.data["date"] = pd.to_datetime(self.data["date"])
         self.data.index.name = "block"
-        # Date with capital D
         self.data.rename(columns={"date": "Date"}, inplace=True)
-        # reset index
         self.data.reset_index(inplace=True)
         self.data["block"] = self.data["block"].astype(int)
-        # update predicted halving date
-        self.data = update_predicted_halving_date(self.data)
-        # cycle length, forced to int
+
+        _prediction = prediction if prediction is not None else get_halving_data()
+        self.data = _update_predicted_halving_date(self.data, _prediction)
+
         self.data["cycle_length"] = (self.data["Date"].diff().dt.days).shift(-1)
-        # cycle id
         self.data["cycle_id"] = range(1, len(self.data) + 1)

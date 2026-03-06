@@ -1,16 +1,19 @@
 """artist module"""
 
-from __future__ import annotations
-
+import datetime
 import warnings
 from typing import TYPE_CHECKING, Literal, Union
 
+from .interactive import InteractiveArtist
 from .static import StaticArtist
 
 if TYPE_CHECKING:
-    from ..bitcoin import Bitcoin
+    import matplotlib.figure
+    import plotly.graph_objects as go
 
-THEMES = {
+    from ..core.bitcoin import Bitcoin
+
+THEMES: dict[str, dict[str, str]] = {
     "light": {
         "background": "white",
         "text": "black",
@@ -18,6 +21,8 @@ THEMES = {
         "now_line": "darkgrey",
         "halving_line": "lightgreen",
         "ath_marker": "black",
+        "low_marker": "red",
+        "watermark": "darkgrey",
     },
     "dark": {
         "background": "black",
@@ -26,82 +31,64 @@ THEMES = {
         "now_line": "lightgrey",
         "halving_line": "lightgreen",
         "ath_marker": "white",
+        "low_marker": "red",
+        "watermark": "lightgrey",
     },
 }
 
 
 class Artist:
-    """Artist for plotting"""
+    """Artist for plotting.
+
+    Args:
+        bitcoin: Bitcoin object with price and halving data.
+        kind: Type of artist ("static" or "interactive").
+        theme: Theme colors — a preset name or a dict of overrides.
+
+    Raises:
+        ValueError: If kind or theme is invalid.
+    """
 
     def __init__(
         self,
-        bitcoin: Bitcoin,
-        kind: Literal["static", "dynamic"],
-        theme: Union[Literal["light", "dark"], dict],
+        bitcoin: "Bitcoin",
+        kind: Literal["static", "interactive"],
+        theme: Literal["light", "dark"] | dict[str, str],
     ):
-        """Artist
+        self.theme: dict[str, str] = self.__unwrap_theme(theme)
 
-        Artist for plotting, either static or dynamic.
-        Static artist uses `matplotlib` and dynamic artist uses `plotly`.
-
-        Arguments:
-            bitcoin (Bitcoin): bitcoin object.
-            kind (Literal["static", "dynamic"], optional): type of artist.
-                Defaults to "static".
-            theme (Union[Literal["light", "dark"], dict], optional): theme colors.
-                Defaults to "light".
-
-
-        Attributes:
-            artist (StaticArtist): artist for plotting
-            theme (dict): theme colors
-
-        Raises:
-            NotImplementedError: _description_
-            ValueError: _description_
-        """
-        self.artist = None
-        self.theme = None
-
-        # unwrap theme
-        self.__unwrap_theme(theme)
-
-        # set artist
         if kind == "static":
             self._kind = kind
-            self.artist = StaticArtist(bitcoin, theme=self.theme)
-        elif kind == "dynamic":
-            # TODO: implement dynamic artist (plotly)
-            raise NotImplementedError
+            self.artist: StaticArtist | InteractiveArtist = StaticArtist(
+                bitcoin, theme=self.theme
+            )
+        elif kind == "interactive":
+            self._kind = kind
+            self.artist = InteractiveArtist(bitcoin, theme=self.theme)
         else:
-            raise ValueError("kind must be 'static' or 'dynamic'")
+            raise ValueError("kind must be 'static' or 'interactive'")
 
     def __unwrap_theme(
         self,
-        theme: Union[Literal["light", "dark"], dict],
-    ) -> None:
-        """unwrap theme
-
-        Args:
-            theme (Union[Literal["light", "dark"], dict], optional): theme colors.
-        """
+        theme: Literal["light", "dark"] | dict[str, str],
+    ) -> dict[str, str]:
+        """Resolve theme to a concrete dict of color values."""
         if isinstance(theme, str) and theme in THEMES:
-            self.theme = THEMES[theme]
-        # if dict, check if it has the right keys
+            return THEMES[theme].copy()
         elif isinstance(theme, dict):
-            # if theme is a dictionary with the same keys as the default themes
-            # then use it
             if set(theme.keys()) == set(THEMES["light"].keys()):
-                self.theme = theme
+                return theme.copy()
             else:
-                # else use the light theme and update the keys
-                for key in theme.keys():
-                    self.theme = THEMES["light"]
+                resolved = THEMES["light"].copy()
+                for key in theme:
                     if key not in THEMES["light"]:
-                        # warning message
-                        warnings.warn(f"Theme key '{key}' not recognized. Ignoring it.")
+                        warnings.warn(
+                            f"Theme key '{key}' not recognized. Ignoring it.",
+                            stacklevel=3,
+                        )
                     else:
-                        self.theme[key] = theme[key]
+                        resolved[key] = theme[key]
+                return resolved
         else:
             raise ValueError(
                 "theme must be 'light', 'dark' or a dictionary with the theme colors"
@@ -111,10 +98,16 @@ class Artist:
     def kind(self) -> str:
         return self._kind
 
-    def plot(self, **kwargs):
-        """wrapper for plot method of artist
+    def plot(
+        self,
+        from_date: str | datetime.datetime | None = None,
+    ) -> Union["matplotlib.figure.Figure", "go.Figure"]:
+        """Delegate to the underlying artist's plot method.
 
         Args:
-            \\*\\*kwargs: keyword arguments to plotting method
+            from_date: Start date for filtering displayed data.
+
+        Returns:
+            A matplotlib Figure (static) or Plotly Figure (interactive).
         """
-        return self.artist.plot(**kwargs)
+        return self.artist.plot(from_date=from_date)
