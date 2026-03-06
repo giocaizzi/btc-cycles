@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   update_chart:
@@ -29,10 +31,22 @@ jobs:
         env:
           CRYPTOCOMPARE_API_KEY: ${{ secrets.CRYPTOCOMPARE_API_KEY }}
 
-      - name: Check for changes
+      - name: Generate interactive chart HTML
+        run: |
+          uv run python -c "
+          import os
+          from btc_cycles import Bitcoin
+          btc = Bitcoin(source='cryptocompare', api_key=os.environ['CRYPTOCOMPARE_API_KEY'])
+          fig = btc.plot(kind='interactive', from_date='2012-11-28')
+          fig.write_html('_site/index.html', config={'scrollZoom': True, 'displayModeBar': True})
+          "
+        env:
+          CRYPTOCOMPARE_API_KEY: ${{ secrets.CRYPTOCOMPARE_API_KEY }}
+
+      - name: Check for chart changes
         id: changes
         run: |
-          if git diff --quiet notebooks/bitcoin.png notebooks/bitcoin.html; then
+          if git diff --quiet notebooks/bitcoin.png; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -49,3 +63,11 @@ jobs:
         with:
           message: "Update chart:${{ steps.current-time.outputs.readableTime }}"
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
