@@ -121,24 +121,25 @@ class StaticArtist:
     def add_data(self, from_date: Union[str, datetime.datetime]) -> None:
         """add data to plot
 
-        This method filters the data inplace.
+        Filters data only for the scatter plot display, keeping full data
+        on self.bitcoin.prices for ATH markers, bottoms, and other overlays.
 
         Args:
             from_date (Union[str, datetime.datetime]): start date
         """
         if from_date is not None:
-            # filter data
-            self.bitcoin.prices = self.bitcoin.prices[
+            self.display_data = self.bitcoin.prices[
                 self.bitcoin.prices.Date >= from_date
             ]
+        else:
+            self.display_data = self.bitcoin.prices
 
         # plot data
         self.axes.scatter(
-            self.bitcoin.prices["cycle_progress"] * 2 * np.pi,
-            self.bitcoin.prices["Close"].to_numpy(),
+            self.display_data["cycle_progress"] * 2 * np.pi,
+            self.display_data["Close"].to_numpy(),
             s=3,
-            # markersize=1,
-            c=self.bitcoin.prices["color"],
+            c=self.display_data["color"],
             zorder=9,
         )
 
@@ -180,7 +181,7 @@ class StaticArtist:
         start_index = next(
             i
             for i, v in enumerate(grid_intervals)
-            if v >= self.bitcoin.prices.Close.min()
+            if v >= self.display_data.Close.min()
         )
 
         # set gridline color
@@ -218,7 +219,7 @@ class StaticArtist:
 
     def add_bottoms(self) -> None:
         """add cycle low points to plot"""
-        lows = self.bitcoin.prices[self.bitcoin.prices["is_cycle_low"]]
+        lows = self.display_data[self.display_data["is_cycle_low"]]
         self.axes.scatter(
             lows["cycle_progress"] * 2 * np.pi,
             lows["Close"],
@@ -262,8 +263,8 @@ class StaticArtist:
         # normalize density to [0, 1] for alpha mapping
         density_norm = density / density.max()
 
-        # radial extent: full price range
-        r_min = self.bitcoin.prices["Close"].min()
+        # radial extent: displayed price range
+        r_min = self.display_data["Close"].min()
         r_max = 1_000_000
 
         # draw each strip
@@ -288,7 +289,7 @@ class StaticArtist:
 
     def add_aths(self) -> None:
         """add all time highs to plot"""
-        aths = self.bitcoin.prices[self.bitcoin.prices["distance_ath_perc"] == 0]
+        aths = self.display_data[self.display_data["distance_ath_perc"] == 0]
         self.axes.scatter(
             aths["cycle_progress"] * 2 * np.pi,
             aths["Close"],
@@ -302,7 +303,7 @@ class StaticArtist:
         """add halving to plot"""
         self.axes.vlines(
             0,
-            self.bitcoin.prices["Close"].min(),
+            self.display_data["Close"].min(),
             1000000,
             color=self.theme["halving_line"],
             linewidth=3,
@@ -311,18 +312,18 @@ class StaticArtist:
 
     def add_now(self) -> None:
         self.axes.scatter(
-            self.bitcoin.prices["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
-            self.bitcoin.prices["Close"].to_numpy()[-1],
+            self.display_data["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
+            self.display_data["Close"].to_numpy()[-1],
             marker="D",
-            c=self.bitcoin.prices["color"].to_numpy()[-1],
+            c=self.display_data["color"].to_numpy()[-1],
             s=50,
             zorder=8,
         )
         # now line
         self.axes.vlines(
-            self.bitcoin.prices["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
-            self.bitcoin.prices["Close"].min(),
-            self.bitcoin.prices["Close"].to_numpy()[-1],
+            self.display_data["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
+            self.display_data["Close"].min(),
+            self.display_data["Close"].to_numpy()[-1],
             color=self.theme["now_line"],
             linestyle="--",
             zorder=8,
@@ -339,7 +340,7 @@ class StaticArtist:
                 [],
                 [],
                 marker="D",
-                color=self.bitcoin.prices["color"].to_numpy()[-1],
+                color=self.display_data["color"].to_numpy()[-1],
                 markersize=7,
                 linestyle="None",
             ),
