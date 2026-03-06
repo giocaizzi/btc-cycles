@@ -33,6 +33,7 @@ jobs:
 
       - name: Generate interactive chart HTML
         run: |
+          mkdir -p _site
           uv run python -c "
           import os
           from btc_cycles import Bitcoin
