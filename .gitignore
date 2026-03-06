@@ -1,5 +1,6 @@
 .vscode
 temp
+_site/
 ########### PYTHON default .gitignore ############
 # Byte-compiled / optimized / DLL files
 __pycache__/
