@@ -10,10 +10,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import gaussian_kde
 
+from .radial_mapping import coin_tick_labels, map_to_btc_radial
 from .utils import ColorBar, ProgressLabels
 
 if TYPE_CHECKING:
     from ..core.bitcoin import Bitcoin
+    from ..core.coin import Coin
 
 # chart constants
 PRICE_UPPER_BOUND = 1_000_000
@@ -27,10 +29,17 @@ class StaticArtist:
     Args:
         bitcoin: Bitcoin object with price and halving data.
         theme: Theme color dictionary.
+        overlay: Optional alt-coin to overlay on the chart.
     """
 
-    def __init__(self, bitcoin: "Bitcoin", theme: dict[str, str]):
+    def __init__(
+        self,
+        bitcoin: "Bitcoin",
+        theme: dict[str, str],
+        overlay: "Coin | None" = None,
+    ):
         self.bitcoin = copy.deepcopy(bitcoin)
+        self.overlay = copy.deepcopy(overlay)
         self.colorbar = ColorBar(self.bitcoin)
         self.theme = theme
 
@@ -61,12 +70,24 @@ class StaticArtist:
         self.axes.set_facecolor(self.theme["background"])
 
         self.add_data(from_date=from_date)
-        self.add_now()
+        if self.overlay is not None:
+            self._filter_overlay(from_date=from_date)
+            self.add_overlay_data()
+        self.add_now_line()
+        if self.overlay is not None:
+            self.add_overlay_now_line()
+        self.add_now_marker()
+        if self.overlay is not None:
+            self.add_overlay_now_marker()
+            self.add_overlay_aths()
+            self.add_overlay_min()
         self.add_halving()
         self.add_aths()
         self.add_bottoms()
         self.add_low_probability_band()
         self.format_chart()
+        if self.overlay is not None:
+            self.add_overlay_axis_labels()
         self.add_legend()
         self.add_colorbar()
         self.add_watermark()
@@ -111,6 +132,135 @@ class StaticArtist:
             c=self.display_data["color"],
             zorder=9,
         )
+
+    def _filter_overlay(self, from_date: str | datetime.datetime | None) -> None:
+        """Filter overlay data by from_date."""
+        if from_date is not None:
+            self.overlay_display = self.overlay.prices[
+                self.overlay.prices.Date >= from_date
+            ]
+        else:
+            self.overlay_display = self.overlay.prices
+
+    def add_overlay_data(self) -> None:
+        """Plot overlay coin scatter data."""
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(self.overlay_display["Close"], btc_close_min)
+
+        self.axes.scatter(
+            self.overlay_display["cycle_progress"] * 2 * np.pi,
+            mapped_r,
+            s=3,
+            c=self.overlay.color,
+            alpha=0.6,
+            zorder=8,
+        )
+
+    def add_overlay_now_line(self) -> None:
+        """Add current overlay coin price vertical dashed line (behind markers)."""
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(self.overlay_display["Close"], btc_close_min)
+        last_theta = self.overlay_display.iloc[-1]["cycle_progress"] * 2 * np.pi
+        self.axes.vlines(
+            last_theta,
+            btc_close_min,
+            mapped_r.iloc[-1],
+            color=self.theme["now_line"],
+            linestyle="--",
+            zorder=2,
+        )
+
+    def add_overlay_now_marker(self) -> None:
+        """Add current overlay coin price marker."""
+        last = self.overlay_display.iloc[-1]
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(self.overlay_display["Close"], btc_close_min)
+
+        self.axes.scatter(
+            last["cycle_progress"] * 2 * np.pi,
+            mapped_r.iloc[-1],
+            marker="o",
+            c=self.overlay.color,
+            s=50,
+            zorder=10,
+            edgecolors="white",
+            linewidths=0.5,
+        )
+
+    def add_overlay_aths(self) -> None:
+        """Add overlay coin all-time high markers."""
+        aths = self.overlay_display[self.overlay_display["distance_ath_perc"] == 0]
+        if aths.empty:
+            return
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(aths["Close"], btc_close_min)
+        self.axes.scatter(
+            aths["cycle_progress"] * 2 * np.pi,
+            mapped_r,
+            marker="*",
+            c=self.overlay.color,
+            s=60,
+            zorder=10,
+            edgecolors="white",
+            linewidths=0.3,
+        )
+
+    def add_overlay_min(self) -> None:
+        """Add overlay coin minimum price marker."""
+        min_idx = self.overlay_display["Close"].idxmin()
+        min_row = self.overlay_display.loc[min_idx]
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(self.overlay_display["Close"], btc_close_min)
+        self.axes.scatter(
+            min_row["cycle_progress"] * 2 * np.pi,
+            mapped_r.loc[min_idx],
+            marker="^",
+            c=self.overlay.color,
+            s=60,
+            zorder=10,
+            edgecolors="white",
+            linewidths=0.3,
+        )
+
+    def add_overlay_axis_labels(self) -> None:
+        """Add alt-coin price tick labels on the opposite side of the chart."""
+        grid_intervals = [
+            0.001,
+            0.01,
+            0.1,
+            1,
+            10,
+            100,
+            1000,
+            10000,
+            100000,
+            PRICE_UPPER_BOUND,
+        ]
+
+        start_index = next(
+            i
+            for i, v in enumerate(grid_intervals)
+            if v >= self.display_data.Close.min()
+        )
+        visible_intervals = grid_intervals[start_index:]
+
+        labels = coin_tick_labels(
+            visible_intervals,
+            self.overlay_display["Close"],
+            self.display_data["Close"].min(),
+        )
+
+        # place labels at 180deg (opposite side from BTC labels at 0deg)
+        for interval, label in zip(visible_intervals, labels):
+            self.axes.annotate(
+                label,
+                xy=(np.pi, interval),
+                fontsize=7,
+                color=self.overlay.color,
+                ha="center",
+                va="center",
+                fontweight="bold",
+            )
 
     def format_chart(self) -> None:
         """Format axes, gridlines, and tick labels."""
@@ -259,23 +409,26 @@ class StaticArtist:
             zorder=0,
         )
 
-    def add_now(self) -> None:
-        """Add current price marker and vertical line."""
-        self.axes.scatter(
-            self.display_data["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
-            self.display_data["Close"].to_numpy()[-1],
-            marker="D",
-            c=self.display_data["color"].to_numpy()[-1],
-            s=50,
-            zorder=8,
-        )
+    def add_now_line(self) -> None:
+        """Add current BTC price vertical dashed line (behind markers)."""
         self.axes.vlines(
             self.display_data["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
             self.display_data["Close"].min(),
             self.display_data["Close"].to_numpy()[-1],
             color=self.theme["now_line"],
             linestyle="--",
-            zorder=8,
+            zorder=2,
+        )
+
+    def add_now_marker(self) -> None:
+        """Add current BTC price diamond marker."""
+        self.axes.scatter(
+            self.display_data["cycle_progress"].to_numpy()[-1] * 2 * np.pi,
+            self.display_data["Close"].to_numpy()[-1],
+            marker="D",
+            c=self.display_data["color"].to_numpy()[-1],
+            s=50,
+            zorder=10,
         )
 
     def add_legend(self) -> None:
@@ -322,6 +475,40 @@ class StaticArtist:
             "Cycle low",
             "Cycle low probability",
         ]
+
+        if self.overlay is not None:
+            sym = self.overlay.symbol
+            clr = self.overlay.color
+            proxies.extend(
+                [
+                    Line2D(
+                        [],
+                        [],
+                        marker="o",
+                        color=clr,
+                        markersize=5,
+                        linestyle="None",
+                        alpha=0.6,
+                    ),
+                    Line2D(
+                        [],
+                        [],
+                        marker="*",
+                        color=clr,
+                        markersize=9,
+                        linestyle="None",
+                    ),
+                    Line2D(
+                        [],
+                        [],
+                        marker="^",
+                        color=clr,
+                        markersize=7,
+                        linestyle="None",
+                    ),
+                ]
+            )
+            labels.extend([f"{sym}/USD", f"{sym} ATH", f"{sym} Minimum"])
 
         legend = self.f.legend(
             proxies,

@@ -26,3 +26,21 @@ def mock_bitcoin(mocker, test_prices):
     )
     bitcoin.predicted_halving_block = 1050000
     return bitcoin
+
+
+@pytest.fixture
+def mock_coin(test_prices):
+    """Mock Coin object with test prices aligned to BTC cycles."""
+    coin = type("Coin", (), {})()
+    # reuse BTC test prices with scaled-down close values to simulate an alt-coin
+    coin_prices = test_prices.copy()
+    coin_prices["Close"] = coin_prices["Close"] / 500
+    # compute ATH and distance for the scaled coin prices
+    coin_prices["ATH"] = coin_prices["Close"].cummax()
+    coin_prices["distance_ath_perc"] = (
+        coin_prices["Close"] - coin_prices["ATH"]
+    ) / coin_prices["ATH"]
+    coin.prices = coin_prices
+    coin.symbol = "SOL"
+    coin.color = "#FF8C00"
+    return coin
