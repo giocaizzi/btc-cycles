@@ -36,7 +36,7 @@ class TestBitcoinInit:
         assert isinstance(bitcoin.predicted_halving_block, int)
         assert bitcoin.predicted_halving_block == 1050000
 
-    def test_default_source_is_cryptocompare(self, mocker, test_prices):
+    def test_default_source_is_coinmarketcap_free(self, mocker, test_prices):
         mocker.patch(
             "btc_cycles.core.bitcoin.get_halving_data",
             return_value=MOCK_PREDICTION,
@@ -45,7 +45,7 @@ class TestBitcoinInit:
         mock_prices_cls.return_value.data = test_prices
         Bitcoin()
         call_kwargs = mock_prices_cls.call_args
-        assert call_kwargs.kwargs["source"] == "cryptocompare"
+        assert call_kwargs.kwargs["source"] == "coinmarketcap-free"
 
 
 class TestBitcoinPlot:

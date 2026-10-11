@@ -25,7 +25,7 @@ class Coin:
     Args:
         symbol: Coin ticker (e.g. "SOL", "ETH").
         halvings: BTC halving DataFrame (from Bitcoin.halvings).
-        source: Data source name. Defaults to "cryptocompare".
+        source: Data source name. Defaults to "coinmarketcap-free".
         currency: Fiat currency. Defaults to "USD".
         api_key: API key for the data source.
         color: Override display color. Defaults to palette lookup.
@@ -40,7 +40,7 @@ class Coin:
         self,
         symbol: str,
         halvings: pd.DataFrame,
-        source: str = "cryptocompare",
+        source: str = "coinmarketcap-free",
         currency: str = "USD",
         api_key: str | None = None,
         color: str | None = None,

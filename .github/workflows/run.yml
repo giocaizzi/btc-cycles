@@ -28,21 +28,16 @@ jobs:
 
       - name: Run notebook
         run: uv run jupyter nbconvert --to notebook --execute --inplace notebooks/bitcoin.ipynb
-        env:
-          CRYPTOCOMPARE_API_KEY: ${{ secrets.CRYPTOCOMPARE_API_KEY }}
 
       - name: Generate interactive chart HTML
         run: |
           mkdir -p _site
           uv run python -c "
-          import os
           from btc_cycles import Bitcoin
-          btc = Bitcoin(source='cryptocompare', api_key=os.environ['CRYPTOCOMPARE_API_KEY'])
+          btc = Bitcoin(source='coinmarketcap-free')
           fig = btc.plot(kind='interactive', from_date='2012-11-28')
           fig.write_html('_site/index.html', config={'scrollZoom': True, 'displayModeBar': True})
           "
-        env:
-          CRYPTOCOMPARE_API_KEY: ${{ secrets.CRYPTOCOMPARE_API_KEY }}
 
       - name: Check for chart changes
         id: changes

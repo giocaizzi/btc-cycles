@@ -21,7 +21,7 @@ class Bitcoin:
     cycle data, and computes metrics (ATH, cycle progress, cycle lows).
 
     Args:
-        source: Data source. Defaults to "cryptocompare".
+        source: Data source. Defaults to "coinmarketcap-free".
         currency: Currency. Defaults to "USD".
         api_key: API key for the data source.
 
@@ -34,7 +34,7 @@ class Bitcoin:
 
     def __init__(
         self,
-        source: str = "cryptocompare",
+        source: str = "coinmarketcap-free",
         currency: str = "USD",
         api_key: str | None = None,
     ):
