@@ -11,10 +11,12 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import gaussian_kde
 
+from .radial_mapping import coin_tick_labels, map_to_btc_radial
 from .utils import ColorBar, ProgressLabels
 
 if TYPE_CHECKING:
     from ..core.bitcoin import Bitcoin
+    from ..core.coin import Coin
 
 # chart constants (shared with static)
 PRICE_UPPER_BOUND = 1_000_000
@@ -28,10 +30,17 @@ class InteractiveArtist:
     Args:
         bitcoin: Bitcoin object with price and halving data.
         theme: Theme color dictionary.
+        overlay: Optional alt-coin to overlay on the chart.
     """
 
-    def __init__(self, bitcoin: "Bitcoin", theme: dict[str, str]):
+    def __init__(
+        self,
+        bitcoin: "Bitcoin",
+        theme: dict[str, str],
+        overlay: "Coin | None" = None,
+    ):
         self.bitcoin = copy.deepcopy(bitcoin)
+        self.overlay = copy.deepcopy(overlay)
         self.colorbar = ColorBar(self.bitcoin)
         self.theme = theme
 
@@ -62,12 +71,32 @@ class InteractiveArtist:
         else:
             self.display_data = self.bitcoin.prices
 
+        if self.overlay is not None:
+            if from_date is not None:
+                self.overlay_display = self.overlay.prices[
+                    self.overlay.prices.Date >= from_date
+                ]
+            else:
+                self.overlay_display = self.overlay.prices
+
         self.fig = go.Figure()
 
         self._add_low_probability_band()
-        self._add_data()
+        # lines first (behind everything)
+        self._add_now_line()
+        if self.overlay is not None:
+            self._add_overlay_now_line()
         self._add_halving()
-        self._add_now()
+        # data scatter
+        self._add_data()
+        if self.overlay is not None:
+            self._add_overlay_data()
+        # markers on top
+        self._add_now_marker()
+        if self.overlay is not None:
+            self._add_overlay_now_marker()
+            self._add_overlay_aths()
+            self._add_overlay_min()
         self._add_aths()
         self._add_bottoms()
         self._add_legend()
@@ -103,12 +132,10 @@ class InteractiveArtist:
             )
         )
 
-    def _add_now(self) -> None:
-        """Add current price marker and radial line."""
+    def _add_now_line(self) -> None:
+        """Add current BTC price radial dashed line (behind markers)."""
         last = self.display_data.iloc[-1]
         theta_now = last["cycle_progress"] * 360
-
-        # radial line from min to current price
         r_min = self.display_data["Close"].min()
         self.fig.add_trace(
             go.Scatterpolar(
@@ -125,7 +152,10 @@ class InteractiveArtist:
             )
         )
 
-        # diamond marker
+    def _add_now_marker(self) -> None:
+        """Add current BTC price diamond marker."""
+        last = self.display_data.iloc[-1]
+        theta_now = last["cycle_progress"] * 360
         self.fig.add_trace(
             go.Scatterpolar(
                 r=[last["Close"]],
@@ -214,6 +244,146 @@ class InteractiveArtist:
                     symbol="triangle-down",
                 ),
                 text=hover_text,
+                hoverinfo="text",
+                showlegend=False,
+            )
+        )
+
+    def _add_overlay_data(self) -> None:
+        """Add overlay coin scatter trace."""
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(self.overlay_display["Close"], btc_close_min)
+        theta_deg = self.overlay_display["cycle_progress"] * 360
+
+        hover_text = [
+            f"{self.overlay.symbol}<br>"
+            f"Date: {row.Date.strftime('%Y-%m-%d')}<br>"
+            f"Price: ${row.Close:,.2f}<br>"
+            f"Cycle: {int(row.cycle_id)}<br>"
+            f"Progress: {row.cycle_progress:.1%}"
+            for _, row in self.overlay_display.iterrows()
+        ]
+
+        self.fig.add_trace(
+            go.Scatterpolar(
+                r=mapped_r,
+                theta=theta_deg,
+                mode="markers",
+                marker=dict(
+                    size=3,
+                    color=self.overlay.color,
+                    opacity=0.6,
+                ),
+                text=hover_text,
+                hoverinfo="text",
+                showlegend=False,
+            )
+        )
+
+    def _add_overlay_now_line(self) -> None:
+        """Add current overlay coin price radial dashed line (behind markers)."""
+        last = self.overlay_display.iloc[-1]
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(self.overlay_display["Close"], btc_close_min)
+        theta_now = last["cycle_progress"] * 360
+
+        self.fig.add_trace(
+            go.Scatterpolar(
+                r=[btc_close_min, mapped_r.iloc[-1]],
+                theta=[theta_now, theta_now],
+                mode="lines",
+                line=dict(
+                    color=self.theme["now_line"],
+                    dash="dash",
+                    width=1,
+                ),
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+
+    def _add_overlay_now_marker(self) -> None:
+        """Add current overlay coin price marker."""
+        last = self.overlay_display.iloc[-1]
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(self.overlay_display["Close"], btc_close_min)
+
+        self.fig.add_trace(
+            go.Scatterpolar(
+                r=[mapped_r.iloc[-1]],
+                theta=[last["cycle_progress"] * 360],
+                mode="markers",
+                marker=dict(
+                    size=10,
+                    color=self.overlay.color,
+                    symbol="circle",
+                    line=dict(color="white", width=1),
+                ),
+                text=[
+                    f"Today {self.overlay.symbol}<br>"
+                    f"Date: {last['Date'].strftime('%Y-%m-%d')}<br>"
+                    f"Price: ${last['Close']:,.2f}"
+                ],
+                hoverinfo="text",
+                showlegend=False,
+            )
+        )
+
+    def _add_overlay_aths(self) -> None:
+        """Add overlay coin all-time high markers."""
+        aths = self.overlay_display[self.overlay_display["distance_ath_perc"] == 0]
+        if aths.empty:
+            return
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(aths["Close"], btc_close_min)
+
+        hover_text = [
+            f"{self.overlay.symbol} ATH<br>"
+            f"Date: {row.Date.strftime('%Y-%m-%d')}<br>"
+            f"Price: ${row.Close:,.2f}"
+            for _, row in aths.iterrows()
+        ]
+
+        self.fig.add_trace(
+            go.Scatterpolar(
+                r=mapped_r,
+                theta=aths["cycle_progress"] * 360,
+                mode="markers",
+                marker=dict(
+                    size=10,
+                    color=self.overlay.color,
+                    symbol="star",
+                    line=dict(color="white", width=0.5),
+                ),
+                text=hover_text,
+                hoverinfo="text",
+                showlegend=False,
+            )
+        )
+
+    def _add_overlay_min(self) -> None:
+        """Add overlay coin minimum price marker."""
+        min_idx = self.overlay_display["Close"].idxmin()
+        min_row = self.overlay_display.loc[min_idx]
+        btc_close_min = self.display_data["Close"].min()
+        mapped_r = map_to_btc_radial(self.overlay_display["Close"], btc_close_min)
+
+        self.fig.add_trace(
+            go.Scatterpolar(
+                r=[mapped_r.loc[min_idx]],
+                theta=[min_row["cycle_progress"] * 360],
+                mode="markers",
+                marker=dict(
+                    size=10,
+                    color=self.overlay.color,
+                    symbol="triangle-up",
+                    line=dict(color="white", width=0.5),
+                ),
+                text=[
+                    f"{self.overlay.symbol} Minimum<br>"
+                    f"Date: {min_row['Date'].strftime('%Y-%m-%d')}<br>"
+                    f"Price: ${min_row['Close']:,.2f}"
+                ],
                 hoverinfo="text",
                 showlegend=False,
             )
@@ -339,6 +509,35 @@ class InteractiveArtist:
                 name="Cycle low probability",
             ),
         ]
+        if self.overlay is not None:
+            sym = self.overlay.symbol
+            clr = self.overlay.color
+            proxy_traces.extend(
+                [
+                    go.Scatterpolar(
+                        r=[None],
+                        theta=[None],
+                        mode="markers",
+                        marker=dict(size=5, color=clr, opacity=0.6),
+                        name=f"{sym}/USD",
+                    ),
+                    go.Scatterpolar(
+                        r=[None],
+                        theta=[None],
+                        mode="markers",
+                        marker=dict(size=8, color=clr, symbol="star"),
+                        name=f"{sym} ATH",
+                    ),
+                    go.Scatterpolar(
+                        r=[None],
+                        theta=[None],
+                        mode="markers",
+                        marker=dict(size=8, color=clr, symbol="triangle-up"),
+                        name=f"{sym} Minimum",
+                    ),
+                ]
+            )
+
         for trace in proxy_traces:
             self.fig.add_trace(trace)
 
@@ -437,6 +636,30 @@ class InteractiveArtist:
                 showlegend=False,
             )
         )
+
+        # overlay axis labels as a text trace at 270deg (opposite of BTC at 90deg)
+        if self.overlay is not None:
+            visible_intervals = grid_intervals[start_index:]
+            overlay_labels = coin_tick_labels(
+                visible_intervals,
+                self.overlay_display["Close"],
+                self.display_data["Close"].min(),
+            )
+            self.fig.add_trace(
+                go.Scatterpolar(
+                    r=visible_intervals,
+                    theta=[270] * len(visible_intervals),
+                    mode="text",
+                    text=overlay_labels,
+                    textfont=dict(
+                        size=9,
+                        color=self.overlay.color,
+                    ),
+                    textposition="middle left",
+                    hoverinfo="skip",
+                    showlegend=False,
+                )
+            )
 
         self.fig.update_layout(
             polar=dict(

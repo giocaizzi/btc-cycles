@@ -199,7 +199,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cryptocmd", specifier = ">=0.6.4" },
+    { name = "cryptocmd", specifier = ">=0.6.5" },
     { name = "cryptocompare", specifier = ">=0.7.6" },
     { name = "matplotlib", specifier = ">=3.8" },
     { name = "pandas", specifier = ">=2.1" },
@@ -725,15 +725,16 @@ toml = [
 
 [[package]]
 name = "cryptocmd"
-version = "0.6.4"
+version = "0.6.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
+    { name = "setuptools", marker = "python_full_version >= '3.12'" },
     { name = "tablib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/94/03/9ec9c6184920626060ea91f75fd88e60946d25c6eb6968443d70905a48ff/cryptocmd-0.6.4.tar.gz", hash = "sha256:9c3e91914a40b8f654d7e3c2f7ca2ec187f2678689d57696b93fad3c5382ba87", size = 6984, upload-time = "2023-10-13T19:36:34.921Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a9/4d/b8fb54cef99e9456d1009c01a1a14694e1729420de5110d252770701befb/cryptocmd-0.6.5.tar.gz", hash = "sha256:3037d134b37dfb59e46b9edf1bad197b76827c503388b38ee4d9bcf503c25554", size = 8583, upload-time = "2026-04-26T00:58:56.762Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d6/60/ecf5636cd124e089033cede8d39d4ef842f5445ddf4ead19d49f5757be74/cryptocmd-0.6.4-py3-none-any.whl", hash = "sha256:f0608b3404f49de91a3b0f78e57d0f603102acc77ef12d8e6bb298948eabda60", size = 9141, upload-time = "2023-10-13T19:36:33.275Z" },
+    { url = "https://files.pythonhosted.org/packages/85/3d/58464e8f18dd5c68b274dcd6f0b8df8366bb670a7dc281b30b2d20bda4bc/cryptocmd-0.6.5-py3-none-any.whl", hash = "sha256:be813823cd6f9a0ac7ad8fc255dbe7bbb24f906b3be3cb6bfcfc7a9b7f422d05", size = 9404, upload-time = "2026-04-26T00:58:55.588Z" },
 ]
 
 [[package]]

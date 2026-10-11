@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     import matplotlib.figure
     import plotly.graph_objects as go
 
+    from .coin import Coin
+
 
 class Bitcoin:
     """Bitcoin price data and halving cycle analysis.
@@ -19,7 +21,7 @@ class Bitcoin:
     cycle data, and computes metrics (ATH, cycle progress, cycle lows).
 
     Args:
-        source: Data source. Defaults to "cryptocompare".
+        source: Data source. Defaults to "coinmarketcap-free".
         currency: Currency. Defaults to "USD".
         api_key: API key for the data source.
 
@@ -32,7 +34,7 @@ class Bitcoin:
 
     def __init__(
         self,
-        source: str = "cryptocompare",
+        source: str = "coinmarketcap-free",
         currency: str = "USD",
         api_key: str | None = None,
     ):
@@ -57,6 +59,7 @@ class Bitcoin:
         kind: Literal["static", "interactive"] = "static",
         from_date: str | datetime.datetime | None = None,
         theme: Literal["light", "dark"] | dict[str, str] = "light",
+        overlay: "Coin | None" = None,
     ) -> Union["matplotlib.figure.Figure", "go.Figure"]:
         """Plot bitcoin prices against halving cycles.
 
@@ -67,8 +70,11 @@ class Bitcoin:
                 is passed, only the keys to override need to be provided.
                 Valid keys: background, text, grid, now_line, halving_line,
                 ath_marker, low_marker, watermark.
+            overlay: Optional alt-coin to overlay on the chart.
 
         Returns:
             A matplotlib Figure (static) or Plotly Figure (interactive).
         """
-        return Artist(bitcoin=self, kind=kind, theme=theme).plot(from_date=from_date)
+        return Artist(bitcoin=self, kind=kind, theme=theme, overlay=overlay).plot(
+            from_date=from_date
+        )

@@ -29,10 +29,7 @@ Fetch Bitcoin price data, enrich it with halving cycle metrics (ATH, cycle progr
 ```python
 from btc_cycles import Bitcoin
 
-btc = Bitcoin(
-    source="cryptocompare",
-    api_key="YOUR_API_KEY",
-)
+btc = Bitcoin()  # defaults to source="coinmarketcap-free", no API key needed
 
 # static chart (matplotlib)
 fig = btc.plot(from_date="2012-11-28")
@@ -53,9 +50,9 @@ pip install btc-cycles
 
 | Source | API Key | Status |
 |--------|---------|--------|
-| [`cryptocompare`](https://www.cryptocompare.com/) | Free tier | **Default** |
+| `coinmarketcap-free` ([cryptoCMD](https://github.com/guptarohit/cryptoCMD)) | None | **Default**, data from 2013-04-28 |
+| [`cryptocompare`](https://www.cryptocompare.com/) | Paid (free tier discontinued) | Supported |
 | [`coinmarketcap`](https://www.coinmarketcap.com) | Paid | Not implemented |
-| `coinmarketcap-free` | None | Broken ([ref](https://github.com/guptarohit/cryptoCMD/issues/86)) |
 
 ## Documentation
 

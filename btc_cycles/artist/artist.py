@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     import plotly.graph_objects as go
 
     from ..core.bitcoin import Bitcoin
+    from ..core.coin import Coin
 
 THEMES: dict[str, dict[str, str]] = {
     "light": {
@@ -44,6 +45,7 @@ class Artist:
         bitcoin: Bitcoin object with price and halving data.
         kind: Type of artist ("static" or "interactive").
         theme: Theme colors — a preset name or a dict of overrides.
+        overlay: Optional alt-coin to overlay on the chart.
 
     Raises:
         ValueError: If kind or theme is invalid.
@@ -54,17 +56,18 @@ class Artist:
         bitcoin: "Bitcoin",
         kind: Literal["static", "interactive"],
         theme: Literal["light", "dark"] | dict[str, str],
+        overlay: "Coin | None" = None,
     ):
         self.theme: dict[str, str] = self.__unwrap_theme(theme)
 
         if kind == "static":
             self._kind = kind
             self.artist: StaticArtist | InteractiveArtist = StaticArtist(
-                bitcoin, theme=self.theme
+                bitcoin, theme=self.theme, overlay=overlay
             )
         elif kind == "interactive":
             self._kind = kind
-            self.artist = InteractiveArtist(bitcoin, theme=self.theme)
+            self.artist = InteractiveArtist(bitcoin, theme=self.theme, overlay=overlay)
         else:
             raise ValueError("kind must be 'static' or 'interactive'")
 

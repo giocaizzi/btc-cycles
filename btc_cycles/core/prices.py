@@ -79,6 +79,38 @@ def _find_cycle_progress(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
+def merge_halvings(data: pd.DataFrame, halvings: pd.DataFrame) -> pd.DataFrame:
+    """Merge price data with halvings and forward-fill cycle metadata.
+
+    Args:
+        data: Price data with "Date" and "Close" columns.
+        halvings: Halving data with "Date", "block", "reward",
+            "cycle_length", and "cycle_id" columns.
+
+    Returns:
+        Merged DataFrame sorted by date with forward-filled cycle metadata.
+    """
+    data["Date"] = pd.to_datetime(data["Date"]).dt.tz_localize("UTC")
+
+    halvings = halvings.copy()
+    halvings["Halving"] = halvings["Date"]
+    data = data.merge(
+        halvings,
+        how="outer",
+        on="Date",
+    )
+    data[["block", "cycle_length", "cycle_id", "Halving", "reward"]] = (
+        data[["block", "cycle_length", "cycle_id", "Halving", "reward"]]
+        .infer_objects()
+        .ffill()
+    )
+    # remove halvings outside of price data range
+    data = data[data["Close"].notna()]
+    # sort by date (ATH calculation requires ascending order)
+    data = data.sort_values("Date").reset_index(drop=True)
+    return data
+
+
 class Prices:
     """Get historical OHLC data and set metrics.
 
@@ -111,24 +143,7 @@ class Prices:
 
     def _fmt_df(self) -> None:
         """Format DataFrame by merging with halvings and forward-filling."""
-        self.data["Date"] = pd.to_datetime(self.data["Date"]).dt.tz_localize("UTC")
-
-        halvings = self.halvings.copy()
-        halvings["Halving"] = halvings["Date"]
-        self.data = self.data.merge(
-            halvings,
-            how="outer",
-            on="Date",
-        )
-        self.data[["block", "cycle_length", "cycle_id", "Halving", "reward"]] = (
-            self.data[["block", "cycle_length", "cycle_id", "Halving", "reward"]]
-            .infer_objects()
-            .ffill()
-        )
-        # remove halvings outside of price data range
-        self.data = self.data[self.data["Close"].notna()]
-        # sort by date (ATH calculation requires ascending order)
-        self.data = self.data.sort_values("Date").reset_index(drop=True)
+        self.data = merge_halvings(self.data, self.halvings)
 
     def _set_metrics(self) -> None:
         """Set ATH, cycle lows, and cycle progress metrics."""

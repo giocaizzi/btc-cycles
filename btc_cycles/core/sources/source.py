@@ -1,7 +1,7 @@
 """Source class"""
 
 import datetime as dt
-import warnings
+import os
 
 import cryptocompare
 import pandas as pd
@@ -19,7 +19,7 @@ class Source:
     """Fetches historical OHLC price data from a named source.
 
     Args:
-        source: Data source name (e.g. "cryptocompare").
+        source: Data source name (e.g. "coinmarketcap-free").
         api_key: API key for the data source.
     """
 
@@ -55,10 +55,16 @@ class Source:
 
     def _fetch_cryptocompare(self, coin: str, fiat: str) -> pd.DataFrame:
         try:
-            cryptocompare.cryptocompare._set_api_key_parameter(self.api_key)
+            # the library reads the key only from the environment
+            if self.api_key:
+                os.environ["CRYPTOCOMPARE_API_KEY"] = self.api_key
             data = cryptocompare.get_historical_price_day_from(
                 coin=coin, currency=fiat, fromTs=START
             )
+            if not data:
+                raise DataSourceError(
+                    "no data returned (invalid API key or quota exhausted?)"
+                )
             data = pd.DataFrame(data)
             data["time"] = pd.to_datetime(data["time"], unit="s")
             data.rename({"time": "Date", "close": "Close"}, axis=1, inplace=True)
@@ -69,12 +75,6 @@ class Source:
             ) from e
 
     def _fetch_coinmarketcap_free(self, coin: str, fiat: str) -> pd.DataFrame:
-        warnings.warn(
-            "The 'coinmarketcap-free' source is broken,"
-            " and if a fix is not found,"
-            " it will be removed in the future.",
-            stacklevel=3,
-        )
         try:
             scraper = CmcScraper(coin, fiat=fiat)
             scraper.get_data()
