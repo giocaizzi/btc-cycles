@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
@@ -55,10 +55,14 @@ jobs:
 
       - name: Commit and push changes
         if: steps.changes.outputs.changed == 'true'
-        uses: giocaizzi/python-dev-actions/.github/actions/commit@main
-        with:
-          message: "Update chart:${{ steps.current-time.outputs.readableTime }}"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          MESSAGE: "Update chart:${{ steps.current-time.outputs.readableTime }}"
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git add -A notebooks
+          git commit -m "$MESSAGE"
+          git push
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
