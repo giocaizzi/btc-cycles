@@ -59,6 +59,7 @@ class Artist:
         overlay: "Coin | None" = None,
     ):
         self.theme: dict[str, str] = self.__unwrap_theme(theme)
+        self._kind: Literal["static", "interactive"]
 
         if kind == "static":
             self._kind = kind

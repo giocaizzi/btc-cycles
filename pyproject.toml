@@ -28,6 +28,7 @@ dev = [
     "jupyter>=1.0",
     "ruff>=0.11",
     "kaleido>=1.2.0",
+    "mypy>=2.4.0",
 ]
 
 [tool.pytest.ini_options]
@@ -54,6 +55,20 @@ select = ["E", "F", "I", "W"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["btc_cycles"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+packages = ["btc_cycles"]
+
+# Pre-existing type debt (Optional overlay, polar Axes, pandas typed as list); fix per module and drop.
+[[tool.mypy.overrides]]
+module = [
+    "btc_cycles.artist.interactive",
+    "btc_cycles.artist.static",
+    "btc_cycles.artist.utils",
+]
+ignore_errors = true
 
 [build-system]
 requires = ["hatchling"]
