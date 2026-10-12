@@ -4,6 +4,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
     groups:
       minor-patch:
         update-types: [minor, patch]
@@ -16,6 +18,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: "ci(deps)"
     groups:
       github-actions:
         patterns: ["*"]
