@@ -6,9 +6,9 @@
 
 [![PyPI](https://img.shields.io/pypi/v/btc-cycles?color=blue)](https://pypi.org/project/btc-cycles/)
 [![Python](https://img.shields.io/pypi/pyversions/btc-cycles)](https://pypi.org/project/btc-cycles/)
-[![Tests](https://github.com/giocaizzi/btc-cycles/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/giocaizzi/btc-cycles/actions/workflows/ci.yml)
+[![CI](https://github.com/giocaizzi/btc-cycles/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/giocaizzi/btc-cycles/actions/workflows/ci.yml)
 [![Update chart](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml/badge.svg)](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml)
-[![Codecov](https://codecov.io/gh/giocaizzi/btc-cycles/branch/main/graph/badge.svg)](https://codecov.io/gh/giocaizzi/btc-cycles)
+[![Coverage](https://codecov.io/gh/giocaizzi/btc-cycles/branch/main/graph/badge.svg)](https://codecov.io/gh/giocaizzi/btc-cycles)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -56,7 +56,7 @@ pip install btc-cycles
 
 ## Documentation
 
-See the [notebook](https://github.com/giocaizzi/btc-cycles/blob/main/notebooks/bitcoin.ipynb) for a full working example.
+See the [notebook](https://github.com/giocaizzi/btc-cycles/blob/main/notebooks/bitcoin.ipynb) for a full working example. How the daily chart is built: [docs/daily-chart.md](docs/daily-chart.md).
 
 ## License
 
