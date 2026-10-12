@@ -6,7 +6,7 @@ on:
     - cron: "0 5 * * *"
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
@@ -53,16 +55,36 @@ jobs:
         uses: josStorer/get-current-time@v2
         id: current-time
 
-      - name: Commit and push changes
+      # main is ruleset-protected: open an auto-merging PR instead of pushing.
+      # The release-please App token (unlike GITHUB_TOKEN) triggers CI on the PR.
+      - name: Mint App token
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ secrets.RP_APP_ID }}
+          private-key: ${{ secrets.RP_APP_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Open auto-merging PR
         if: steps.changes.outputs.changed == 'true'
         env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           MESSAGE: "Update chart:${{ steps.current-time.outputs.readableTime }}"
+          BRANCH: bot/daily-chart
+          TITLE: "chore(data): update daily chart"
         run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
+          git switch -C "$BRANCH"
           git add -A notebooks
           git commit -m "$MESSAGE"
-          git push
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body "Daily chart refresh by the \`Update chart\` workflow."
+          fi
+          gh pr merge "$BRANCH" --auto --squash --delete-branch
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
