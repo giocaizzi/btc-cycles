@@ -6,7 +6,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/btc-cycles?color=blue)](https://pypi.org/project/btc-cycles/)
 [![Python](https://img.shields.io/pypi/pyversions/btc-cycles)](https://pypi.org/project/btc-cycles/)
-[![Tests](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml/badge.svg?branch=main)](https://github.com/giocaizzi/btc-cycles/actions/workflows/deployment.yml)
+[![Tests](https://github.com/giocaizzi/btc-cycles/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/giocaizzi/btc-cycles/actions/workflows/ci.yml)
 [![Update chart](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml/badge.svg)](https://github.com/giocaizzi/btc-cycles/actions/workflows/run.yml)
 [![Codecov](https://codecov.io/gh/giocaizzi/btc-cycles/branch/main/graph/badge.svg)](https://codecov.io/gh/giocaizzi/btc-cycles)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
